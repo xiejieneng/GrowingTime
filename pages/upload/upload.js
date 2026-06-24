@@ -26,6 +26,13 @@ function placeText(meta) {
   return "未记录位置";
 }
 
+function formatPixels(width, height) {
+  if (!width || !height) {
+    return "像素未知";
+  }
+  return `${width}×${height}px`;
+}
+
 Page({
   data: {
     quality: 92,
@@ -149,13 +156,14 @@ Page({
           originalSize: compressed.originalSize || file.size,
           compressedSize: compressed.compressedSize,
           displaySize: compressed.compressedSize,
+          quality: compressed.quality,
           storageMode: this.data.uploadOriginal ? "backup" : "saving"
         };
 
         const loggedIn = auth.isLoggedIn();
         this.updateQueue(id, {
           statusText: loggedIn ? "上传云存储中" : "保存到本地",
-          sizeText: `${formatSize(photo.originalSize)} -> ${formatSize(photo.compressedSize)}，节省 ${Math.max(compressed.ratio, 0)}%`
+          sizeText: `${formatPixels(photo.width, photo.height)} · ${formatSize(photo.originalSize)} -> ${formatSize(photo.compressedSize)}`
         });
 
         let cloudMeta = {};
@@ -192,7 +200,7 @@ Page({
           statusText: "已整理",
           displayDate: formatDate(cloudPhoto.takenAt),
           placeText: placeText(cloudPhoto),
-          sizeText: `${formatSize(cloudPhoto.originalSize)} -> ${formatSize(cloudPhoto.compressedSize)}，节省 ${Math.max(compressed.ratio, 0)}%`,
+          sizeText: `${formatPixels(cloudPhoto.width, cloudPhoto.height)} · 质量 ${cloudPhoto.quality}% · 节省 ${Math.max(compressed.ratio, 0)}%`,
           cloudText
         });
       } catch (error) {

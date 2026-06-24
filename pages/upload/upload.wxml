@@ -47,7 +47,7 @@
 
   <view class="queue">
     <view wx:for="{{queue}}" wx:key="id" class="queue-item panel">
-      <image src="{{item.compressedPath || item.path}}" mode="aspectFill"></image>
+      <image src="{{item.compressedPath || item.path}}" mode="aspectFill" fade-in="{{false}}"></image>
       <view class="queue-body">
         <view class="queue-title">{{item.statusText}}</view>
         <view class="queue-meta">{{item.displayDate}} · {{item.placeText}}</view>

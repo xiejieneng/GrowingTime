@@ -50,16 +50,29 @@ function calcTargetSize(width, height, maxSide) {
   };
 }
 
+function updateCanvasSize(page, width, height) {
+  return new Promise((resolve) => {
+    page.setData({
+      canvasWidth: width,
+      canvasHeight: height
+    }, () => {
+      if (wx.nextTick) {
+        wx.nextTick(resolve);
+      } else {
+        setTimeout(resolve, 16);
+      }
+    });
+  });
+}
+
 async function compressPhoto(page, filePath, options = {}) {
-  const quality = options.quality || 92;
+  const qualityPercent = Math.min(Math.max(Number(options.quality) || 92, 70), 100);
+  const quality = qualityPercent / 100;
   const maxSide = options.maxSide || 4096;
   const info = await getImageInfo(filePath);
   const target = calcTargetSize(info.width, info.height, maxSide);
 
-  page.setData({
-    canvasWidth: target.width,
-    canvasHeight: target.height
-  });
+  await updateCanvasSize(page, target.width, target.height);
 
   const ctx = wx.createCanvasContext("compressCanvas", page);
   ctx.clearRect(0, 0, target.width, target.height);
@@ -88,6 +101,7 @@ async function compressPhoto(page, filePath, options = {}) {
     height: target.height,
     originalSize: originalInfo.size,
     compressedSize: compressedInfo.size,
+    quality: qualityPercent,
     ratio: originalInfo.size ? Math.round((1 - compressedInfo.size / originalInfo.size) * 100) : 0
   };
 }

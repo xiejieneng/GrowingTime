@@ -35,7 +35,7 @@
 
   <view wx:if="{{photos.length}}" class="select-grid">
     <view wx:for="{{photos}}" wx:key="id" class="select-card {{item.selected ? 'selected' : ''}}" bindtap="togglePhoto" data-id="{{item.id}}">
-      <image src="{{item.compressedPath || item.path}}" mode="aspectFill"></image>
+      <image src="{{item.compressedPath || item.path}}" mode="aspectFill" fade-in="{{false}}"></image>
       <view class="checkmark">{{item.selected ? "✓" : ""}}</view>
     </view>
   </view>

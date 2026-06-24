@@ -65,7 +65,7 @@
 
   <view wx:if="{{recentPhotos.length}}" class="recent-grid">
     <view wx:for="{{recentPhotos}}" wx:key="id" class="photo-card panel">
-      <image src="{{item.compressedPath || item.path}}" mode="aspectFill"></image>
+      <image src="{{item.compressedPath || item.path}}" mode="aspectFill" fade-in="{{false}}"></image>
       <view class="photo-meta">
         <view class="photo-date">{{item.displayDate}}</view>
         <view class="photo-place">{{item.placeText}}</view>
