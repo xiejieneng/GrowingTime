@@ -14,6 +14,14 @@
       <view class="photo-grid">
         <view wx:for="{{item.photos}}" wx:key="id" wx:for-item="photo" class="album-card panel" bindtap="previewPhoto" data-src="{{photo.compressedPath || photo.path}}">
           <image src="{{photo.compressedPath || photo.path}}" mode="aspectFill" fade-in="{{false}}" show-menu-by-longpress="{{true}}"></image>
+          <button
+            class="photo-delete"
+            hover-class="photo-delete-pressed"
+            loading="{{deletingPhotoId === photo.id}}"
+            disabled="{{deletingPhotoId !== ''}}"
+            data-id="{{photo.id}}"
+            catchtap="deletePhoto"
+          >删除</button>
           <view class="album-meta">
             <view class="album-date">{{photo.displayDate}}</view>
             <view class="album-place">{{photo.placeText}}</view>

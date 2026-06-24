@@ -127,6 +127,26 @@ function savePhotoMeta(photo) {
   });
 }
 
+function deletePhotoMeta(photoId) {
+  if (!hasCloud()) {
+    return Promise.resolve({ localOnly: true });
+  }
+  const session = auth.getSession();
+  const collection = wx.cloud.database().collection(PHOTO_COLLECTION);
+  return collection.where({
+    ownerId: session.user.id,
+    id: photoId
+  }).get().then(async (res) => {
+    const records = res.data || [];
+    for (const record of records) {
+      await collection.doc(record._id).remove();
+    }
+    return {
+      removed: records.length
+    };
+  });
+}
+
 async function pullCloudPhotos() {
   if (!hasCloud()) {
     return [];
@@ -166,5 +186,6 @@ module.exports = {
   saveStorageSettings,
   uploadPhotoAssets,
   savePhotoMeta,
+  deletePhotoMeta,
   pullCloudPhotos
 };

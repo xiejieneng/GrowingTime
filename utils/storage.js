@@ -51,6 +51,12 @@ function updatePhoto(id, patch) {
   return photos.find((photo) => photo.id === id);
 }
 
+function removePhoto(id) {
+  const photos = getPhotos().filter((photo) => photo.id !== id);
+  savePhotos(photos);
+  return photos;
+}
+
 function getStorageStats() {
   const photos = getPhotos();
   const videos = getVideos();
@@ -99,6 +105,7 @@ module.exports = {
   addPhotos,
   mergePhotos,
   updatePhoto,
+  removePhoto,
   getStorageStats,
   getVideos,
   saveVideos,
