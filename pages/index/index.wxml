@@ -15,8 +15,8 @@
       <view class="subtitle hero-subtitle">把照片按拍摄时间与地点整理成成长档案，保留清晰画质，也能挑选片段生成纪念短视频。</view>
     </view>
     <view class="hero-actions">
-      <button class="primary-btn action-btn" bindtap="goUpload">上传整理</button>
-      <button class="ghost-btn action-btn" bindtap="goVideo">生成视频</button>
+      <button class="primary-btn action-btn" hover-class="button-pressed" bindtap="goUpload">上传整理</button>
+      <button class="ghost-btn action-btn" hover-class="button-pressed" bindtap="goVideo">生成视频</button>
     </view>
   </view>
 

@@ -26,6 +26,6 @@
   <view wx:else class="empty panel">
     <view class="empty-title">相册还是空的</view>
     <view class="empty-text">去“整理”页选择原图，系统会自动按拍摄时间生成成长月份。</view>
-    <button class="primary-btn empty-btn" bindtap="goUpload">开始整理</button>
+    <button class="primary-btn empty-btn" hover-class="button-pressed" bindtap="goUpload">开始整理</button>
   </view>
 </view>

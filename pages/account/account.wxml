@@ -12,7 +12,7 @@
       <checkbox checked="{{agreed}}" color="#2F6B55" />
       <view>我同意使用微信身份创建成长账号，并将我主动同步的内容保存到云端。</view>
     </view>
-    <button class="primary-btn login-btn" loading="{{loggingIn}}" disabled="{{loggingIn || !agreed}}" bindtap="login">
+    <button class="primary-btn login-btn" hover-class="button-pressed" loading="{{loggingIn}}" disabled="{{loggingIn || !agreed}}" bindtap="login">
       微信注册 / 登录
     </button>
     <view class="privacy-note">无需设置密码。首次使用自动注册；测试号仅支持本地模式，正式 AppID 才能使用云登录。</view>
@@ -42,10 +42,10 @@
       </view>
     </view>
 
-    <button class="primary-btn login-btn" loading="{{syncing}}" disabled="{{syncing || !pendingCount}}" bindtap="syncLocalData">
+    <button class="primary-btn login-btn" hover-class="button-pressed" loading="{{syncing}}" disabled="{{syncing || !pendingCount}}" bindtap="syncLocalData">
       {{syncing ? "同步中" : "同步本地照片到云端"}}
     </button>
-    <button class="ghost-btn logout-btn" bindtap="logout">退出登录</button>
+    <button class="ghost-btn logout-btn" hover-class="button-pressed" bindtap="logout">退出登录</button>
   </view>
 
   <view class="section panel rule-panel">

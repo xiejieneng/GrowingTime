@@ -23,7 +23,7 @@
       </view>
     </view>
 
-    <button class="primary-btn create-btn" loading="{{creating}}" disabled="{{creating || !selectedCount}}" bindtap="createVideo">
+    <button class="primary-btn create-btn" hover-class="button-pressed" loading="{{creating}}" disabled="{{creating || !selectedCount}}" bindtap="createVideo">
       {{creating ? "提交中" : "生成短视频"}}
     </button>
   </view>
@@ -43,7 +43,7 @@
   <view wx:else class="empty panel">
     <view class="empty-title">先整理几张照片</view>
     <view class="empty-text">AI 视频会使用“相册”里已经整理好的照片作为素材。</view>
-    <button class="primary-btn empty-btn" bindtap="goUpload">去整理</button>
+    <button class="primary-btn empty-btn" hover-class="button-pressed" bindtap="goUpload">去整理</button>
   </view>
 
   <view wx:if="{{videos.length}}" class="section">

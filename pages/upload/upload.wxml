@@ -35,7 +35,7 @@
       </picker>
     </view>
 
-    <button class="primary-btn choose-btn" loading="{{processing}}" disabled="{{processing}}" bindtap="chooseImages">
+    <button class="primary-btn choose-btn" hover-class="button-pressed" loading="{{processing}}" disabled="{{processing}}" bindtap="chooseImages">
       {{processing ? "处理中" : "选择照片"}}
     </button>
   </view>
