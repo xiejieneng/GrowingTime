@@ -61,6 +61,14 @@
         <view class="task-side">
           <view class="task-status {{item.failed ? 'failed' : ''}}">{{item.statusText}}</view>
           <button wx:if="{{item.playable}}" class="task-play" hover-class="button-pressed" data-id="{{item.id}}" bindtap="playVideo">在线播放</button>
+          <button
+            class="task-delete"
+            hover-class="button-pressed"
+            loading="{{deletingVideoId === item.id}}"
+            disabled="{{deletingVideoId !== ''}}"
+            data-id="{{item.id}}"
+            bindtap="deleteVideo"
+          >删除</button>
         </view>
       </view>
     </view>

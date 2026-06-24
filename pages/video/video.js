@@ -17,6 +17,7 @@ Page({
     videos: [],
     creating: false,
     refreshing: false,
+    deletingVideoId: "",
     activeVideo: null,
     playerError: ""
   },
@@ -289,6 +290,75 @@ Page({
     wx.showToast({
       title: completedCount ? `${completedCount}个视频已完成` : "任务状态已刷新",
       icon: completedCount ? "success" : "none"
+    });
+  },
+
+  confirmDelete(content) {
+    return new Promise((resolve) => {
+      wx.showModal({
+        title: "删除视频记录",
+        content,
+        confirmText: "删除",
+        confirmColor: "#B34136",
+        success: (res) => resolve(Boolean(res.confirm)),
+        fail: () => resolve(false)
+      });
+    });
+  },
+
+  async deleteCloudVideoFiles(video) {
+    if (!auth.canUseCloud() || !auth.isLoggedIn()) {
+      return true;
+    }
+    const fileList = [video.videoFileId, video.coverFileId].filter((fileID, index, list) => {
+      return fileID && fileID.startsWith("cloud://") && list.indexOf(fileID) === index;
+    });
+    if (!fileList.length) {
+      return true;
+    }
+    try {
+      const res = await wx.cloud.deleteFile({ fileList });
+      return (res.fileList || []).every((item) => item.status === 0);
+    } catch (error) {
+      console.warn("delete cloud video files failed", error);
+      return false;
+    }
+  },
+
+  async deleteVideo(event) {
+    const id = event.currentTarget.dataset.id;
+    if (!id || this.data.deletingVideoId) {
+      return;
+    }
+    const video = storage.getVideos().find((item) => item.id === id);
+    if (!video) {
+      return;
+    }
+    const hasCloudFiles = [video.videoFileId, video.coverFileId].some((fileID) => {
+      return fileID && fileID.startsWith("cloud://");
+    });
+    const confirmed = await this.confirmDelete(
+      hasCloudFiles
+        ? "将删除这条生成记录，并清理云端成品视频和封面。此操作不可恢复。"
+        : "将删除这条生成记录。外部视频地址及第三方任务不会被删除。"
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    this.setData({ deletingVideoId: id });
+    if (this.data.activeVideo && this.data.activeVideo.id === id) {
+      this.closePlayer();
+    }
+    const cloudDeleted = await this.deleteCloudVideoFiles(video);
+    const videos = storage.removeVideo(id);
+    this.setData({
+      videos: this.decorateVideos(videos),
+      deletingVideoId: ""
+    });
+    wx.showToast({
+      title: cloudDeleted ? "已删除" : "记录已删，云文件待清理",
+      icon: cloudDeleted ? "success" : "none"
     });
   },
 

@@ -87,6 +87,12 @@ function updateVideo(id, patch) {
   return videos.find((video) => video.id === id);
 }
 
+function removeVideo(id) {
+  const videos = getVideos().filter((video) => video.id !== id);
+  saveVideos(videos);
+  return videos;
+}
+
 module.exports = {
   getPhotos,
   savePhotos,
@@ -97,5 +103,6 @@ module.exports = {
   getVideos,
   saveVideos,
   addVideo,
-  updateVideo
+  updateVideo,
+  removeVideo
 };

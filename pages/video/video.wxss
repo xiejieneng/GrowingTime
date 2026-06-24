@@ -153,6 +153,25 @@ input,
   font-size: 23rpx;
 }
 
+.task-delete {
+  width: 150rpx;
+  min-height: 58rpx;
+  height: 58rpx;
+  margin-top: 12rpx;
+  padding: 0;
+  color: #b34136;
+  background: #fff5f3;
+  border: 1rpx solid #efd5d0;
+  border-radius: 8rpx;
+  font-size: 23rpx;
+}
+
+.task-delete[disabled] {
+  color: #b98e88;
+  background: #faf3f1;
+  border-color: #eee0dd;
+}
+
 .player-mask {
   position: fixed;
   z-index: 100;
