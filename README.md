@@ -19,7 +19,7 @@
 4. 将 `cloudfunctions/createVideo/index.js` 中的 mock 逻辑替换为真实视频生成服务调用。
 5. 创建云数据库集合 `users` 和 `photos`，分别用于账号与照片元数据索引。
 
-`project.config.json` 默认使用 `touristappid` 方便查看本地界面。测试号会自动禁用云开发，照片保存在本机；使用账号登录、云存储和云函数前，必须替换为微信公众平台提供的正式小程序 AppID。
+项目已在 `project.config.json` 中绑定正式小程序 AppID。代码仍保留测试号兼容逻辑：如果改成 `touristappid`，会自动禁用云开发并将照片保存在本机。
 
 ## 存储方案
 
