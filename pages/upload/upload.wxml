@@ -1,0 +1,61 @@
+<view class="page upload-page">
+  <view class="title">图片高清整理</view>
+  <view class="subtitle">选择宝宝照片后，会读取照片内的拍摄日期和 GPS 信息，并以高质量参数生成更适合小程序保存与分享的版本。</view>
+
+  <view class="section panel control-panel">
+    <view class="storage-mode">
+      <view>
+        <view class="field-title">存储方案</view>
+        <view class="field-desc">{{storageModeText}}</view>
+      </view>
+      <switch checked="{{uploadOriginal}}" color="#2F6B55" bindchange="onOriginalSwitch" />
+    </view>
+
+    <view class="saving-note">
+      <view class="note-title">{{loggedIn ? "省钱模式" : "游客本地存储"}}</view>
+      <view class="note-text">{{loggedIn ? "默认只上传展示图和照片索引；开启高清备份后，仅在 Wi‑Fi 下额外上传原图。" : "未注册登录时不会上传照片。清理小程序数据或更换手机可能导致记录丢失。"}}</view>
+    </view>
+
+    <view class="field-row">
+      <view>
+        <view class="field-title">压缩质量</view>
+        <view class="field-desc">数值越高越接近原图，体积越大</view>
+      </view>
+      <view class="quality-value">{{quality}}%</view>
+    </view>
+    <slider min="70" max="98" step="1" value="{{quality}}" activeColor="#2F6B55" block-size="20" bindchange="onQualityChange" />
+
+    <view class="field-row max-row">
+      <view>
+        <view class="field-title">最长边限制</view>
+        <view class="field-desc">默认 4096px，兼顾清晰度与体积</view>
+      </view>
+      <picker range="{{maxSideOptions}}" value="{{maxSideIndex}}" bindchange="onMaxSideChange">
+        <view class="picker-value">{{maxSideOptions[maxSideIndex]}}px</view>
+      </picker>
+    </view>
+
+    <button class="primary-btn choose-btn" loading="{{processing}}" disabled="{{processing}}" bindtap="chooseImages">
+      {{processing ? "处理中" : "选择照片"}}
+    </button>
+  </view>
+
+  <view wx:if="{{queue.length}}" class="section section-head">
+    <view class="section-title">本次处理</view>
+    <view class="muted">{{queue.length}} 张</view>
+  </view>
+
+  <view class="queue">
+    <view wx:for="{{queue}}" wx:key="id" class="queue-item panel">
+      <image src="{{item.compressedPath || item.path}}" mode="aspectFill"></image>
+      <view class="queue-body">
+        <view class="queue-title">{{item.statusText}}</view>
+        <view class="queue-meta">{{item.displayDate}} · {{item.placeText}}</view>
+        <view class="queue-meta">{{item.sizeText}}</view>
+        <view wx:if="{{item.cloudText}}" class="queue-cloud">{{item.cloudText}}</view>
+      </view>
+    </view>
+  </view>
+
+  <canvas canvas-id="compressCanvas" class="compress-canvas" style="width: {{canvasWidth}}px; height: {{canvasHeight}}px;"></canvas>
+</view>

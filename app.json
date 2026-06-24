@@ -1,0 +1,41 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/account/account",
+    "pages/upload/upload",
+    "pages/albums/albums",
+    "pages/video/video"
+  ],
+  "window": {
+    "navigationBarTitleText": "成长时光",
+    "navigationBarBackgroundColor": "#F8FAF7",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F8FAF7"
+  },
+  "tabBar": {
+    "color": "#6E7469",
+    "selectedColor": "#2F6B55",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/upload/upload",
+        "text": "整理"
+      },
+      {
+        "pagePath": "pages/albums/albums",
+        "text": "相册"
+      },
+      {
+        "pagePath": "pages/video/video",
+        "text": "视频"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

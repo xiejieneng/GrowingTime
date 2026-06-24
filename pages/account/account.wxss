@@ -1,0 +1,150 @@
+.account-page {
+  padding-bottom: 60rpx;
+}
+
+.login-panel,
+.profile-panel,
+.rule-panel {
+  padding: 28rpx;
+}
+
+.mode-mark {
+  display: inline-flex;
+  padding: 10rpx 16rpx;
+  color: #8a5a12;
+  background: #fff8ec;
+  border: 1rpx solid #f4dfbd;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.field {
+  margin-top: 28rpx;
+}
+
+.field-title {
+  font-weight: 700;
+}
+
+.field input {
+  height: 84rpx;
+  margin-top: 12rpx;
+  padding: 0 20rpx;
+  background: #f8faf7;
+  border: 1rpx solid #dfe6df;
+  border-radius: 8rpx;
+}
+
+.agreement-row {
+  display: grid;
+  grid-template-columns: 44rpx 1fr;
+  gap: 12rpx;
+  align-items: start;
+  margin-top: 26rpx;
+  color: #687269;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.agreement-row checkbox {
+  transform: scale(0.8);
+  transform-origin: left top;
+}
+
+.login-btn {
+  height: 88rpx;
+  line-height: 88rpx;
+  margin-top: 28rpx;
+}
+
+.privacy-note {
+  margin-top: 16rpx;
+  color: #758076;
+  text-align: center;
+  font-size: 23rpx;
+  line-height: 1.5;
+}
+
+.profile-head {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.profile-avatar {
+  width: 88rpx;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  background: #2f6b55;
+  border-radius: 50%;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.profile-name {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.profile-state {
+  margin-top: 6rpx;
+  color: #2f6b55;
+  font-size: 24rpx;
+}
+
+.sync-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 28rpx;
+  padding: 22rpx 0;
+  background: #f8faf7;
+  border-radius: 8rpx;
+  text-align: center;
+}
+
+.summary-value {
+  color: #2f6b55;
+  font-size: 36rpx;
+  font-weight: 700;
+}
+
+.summary-label {
+  margin-top: 4rpx;
+  color: #758076;
+  font-size: 23rpx;
+}
+
+.logout-btn {
+  height: 84rpx;
+  line-height: 84rpx;
+  margin-top: 18rpx;
+}
+
+.rule-title {
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.rule-row {
+  display: grid;
+  grid-template-columns: 150rpx 1fr;
+  gap: 20rpx;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #edf1ec;
+  color: #687269;
+  font-size: 25rpx;
+  line-height: 1.45;
+}
+
+.rule-row:last-child {
+  border-bottom: 0;
+}
+
+.rule-row text:first-child {
+  color: #233029;
+  font-weight: 700;
+}

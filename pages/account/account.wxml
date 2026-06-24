@@ -1,0 +1,57 @@
+<view class="page account-page">
+  <view class="title">账号与云同步</view>
+  <view class="subtitle">游客数据只在本机保存。使用微信身份注册登录后，可将成长照片索引和展示图安全同步到云端。</view>
+
+  <view wx:if="{{!loggedIn}}" class="section panel login-panel">
+    <view class="mode-mark">当前：游客本地模式</view>
+    <view class="field">
+      <view class="field-title">宝宝昵称</view>
+      <input value="{{babyName}}" maxlength="16" placeholder="例如：小满" bindinput="onBabyNameInput" />
+    </view>
+    <view class="agreement-row" bindtap="toggleAgreement">
+      <checkbox checked="{{agreed}}" color="#2F6B55" />
+      <view>我同意使用微信身份创建成长账号，并将我主动同步的内容保存到云端。</view>
+    </view>
+    <button class="primary-btn login-btn" loading="{{loggingIn}}" disabled="{{loggingIn || !agreed}}" bindtap="login">
+      微信注册 / 登录
+    </button>
+    <view class="privacy-note">无需设置密码。首次使用自动注册，再次使用同一微信身份可登录。</view>
+  </view>
+
+  <view wx:else class="section panel profile-panel">
+    <view class="profile-head">
+      <view class="profile-avatar">{{userInitial}}</view>
+      <view>
+        <view class="profile-name">{{user.nickName}}</view>
+        <view class="profile-state">账号已登录 · 云同步可用</view>
+      </view>
+    </view>
+
+    <view class="sync-summary">
+      <view>
+        <view class="summary-value">{{localCount}}</view>
+        <view class="summary-label">本地照片</view>
+      </view>
+      <view>
+        <view class="summary-value">{{cloudCount}}</view>
+        <view class="summary-label">已同步</view>
+      </view>
+      <view>
+        <view class="summary-value">{{pendingCount}}</view>
+        <view class="summary-label">待同步</view>
+      </view>
+    </view>
+
+    <button class="primary-btn login-btn" loading="{{syncing}}" disabled="{{syncing || !pendingCount}}" bindtap="syncLocalData">
+      {{syncing ? "同步中" : "同步本地照片到云端"}}
+    </button>
+    <button class="ghost-btn logout-btn" bindtap="logout">退出登录</button>
+  </view>
+
+  <view class="section panel rule-panel">
+    <view class="rule-title">数据保存规则</view>
+    <view class="rule-row"><text>游客</text><text>仅本地，不产生云存储费用</text></view>
+    <view class="rule-row"><text>登录账号</text><text>默认同步压缩展示图和索引</text></view>
+    <view class="rule-row"><text>高清备份</text><text>仅 Wi-Fi 下额外上传原图</text></view>
+  </view>
+</view>

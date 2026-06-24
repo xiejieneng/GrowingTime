@@ -1,0 +1,1158 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>成长时光 HTML 原型</title>
+  <style>
+    :root {
+      --bg: #f8faf7;
+      --text: #233029;
+      --muted: #6f7a72;
+      --line: #e5ebe4;
+      --brand: #2f6b55;
+      --brand-soft: #edf5ef;
+      --gold: #f1b66b;
+      --white: #ffffff;
+      --shadow: 0 10px 28px rgba(55, 71, 62, 0.08);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #dfe8df;
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .stage {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .phone {
+      width: min(430px, 100%);
+      height: min(880px, calc(100vh - 48px));
+      min-height: 720px;
+      background: var(--bg);
+      border: 1px solid rgba(35, 48, 41, 0.12);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 24px 70px rgba(31, 45, 38, 0.22);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .status {
+      height: 34px;
+      padding: 9px 20px 0;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .nav {
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-bottom: 1px solid var(--line);
+      font-weight: 700;
+      background: rgba(248, 250, 247, 0.94);
+    }
+
+    .screen {
+      overflow: auto;
+      padding: 20px 18px 92px;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.16;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.58;
+      font-size: 14px;
+    }
+
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      height: 24px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .hero {
+      min-height: 220px;
+      padding: 24px 20px;
+      color: var(--white);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        linear-gradient(135deg, rgba(36, 95, 74, 0.96), rgba(116, 165, 109, 0.84) 56%, rgba(241, 182, 107, 0.9)),
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 0, rgba(255, 255, 255, 0.15) 1px, transparent 1px, transparent 18px);
+    }
+
+    .account-strip {
+      display: grid;
+      grid-template-columns: 38px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 0 2px 14px;
+      cursor: pointer;
+    }
+
+    .account-avatar {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      color: var(--white);
+      background: var(--brand);
+      border-radius: 50%;
+      font-weight: 800;
+    }
+
+    .account-name {
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .account-action {
+      color: var(--brand);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .login-panel {
+      padding: 18px;
+    }
+
+    .agreement {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 8px;
+      align-items: start;
+      margin: 16px 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .sync-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      margin: 18px 0;
+      padding: 14px 0;
+      background: #f6f8f4;
+      border-radius: var(--radius);
+      text-align: center;
+    }
+
+    .sync-summary strong {
+      display: block;
+      color: var(--brand);
+      font-size: 22px;
+    }
+
+    .sync-summary span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .hero .pill {
+      color: var(--white);
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .hero .title {
+      margin-top: 12px;
+      color: var(--white);
+    }
+
+    .hero .subtitle {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      height: 44px;
+      border: 0;
+      border-radius: var(--radius);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: var(--brand);
+      color: var(--white);
+    }
+
+    .btn.ghost {
+      background: var(--white);
+      color: var(--brand);
+      border: 1px solid #d8e4dc;
+    }
+
+    .hero .btn.ghost {
+      border: 0;
+    }
+
+    .section {
+      margin-top: 20px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .link {
+      color: var(--brand);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .stat {
+      padding: 15px 8px;
+      text-align: center;
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--brand);
+      font-size: 24px;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .storage-card {
+      padding: 16px;
+    }
+
+    .storage-badge {
+      min-width: 58px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      color: var(--brand);
+      background: var(--brand-soft);
+      border-radius: var(--radius);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 64px 1fr 58px;
+      gap: 8px;
+      align-items: center;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .bar-track {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #edf1ec;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+    }
+
+    .bar-fill.display {
+      width: 32%;
+      background: var(--brand);
+    }
+
+    .bar-fill.original {
+      width: 100%;
+      background: var(--gold);
+    }
+
+    .saving-text {
+      margin-top: 12px;
+      padding: 10px;
+      color: #8a5a12;
+      background: #fff8ec;
+      border: 1px solid #f4dfbd;
+      border-radius: var(--radius);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .photo-card {
+      overflow: hidden;
+    }
+
+    .photo-card img {
+      display: block;
+      width: 100%;
+      height: 132px;
+      object-fit: cover;
+      background: #edf1ec;
+    }
+
+    .photo-meta {
+      padding: 10px;
+    }
+
+    .photo-date {
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .photo-place,
+    .meta {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .control {
+      padding: 16px;
+    }
+
+    .saving-note {
+      padding: 12px;
+      margin-bottom: 16px;
+      color: #7d6b4d;
+      background: #fff8ec;
+      border: 1px solid #f4dfbd;
+      border-radius: var(--radius);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .switch {
+      width: 48px;
+      height: 28px;
+      padding: 3px;
+      border: 0;
+      border-radius: 999px;
+      background: #d8e4dc;
+      cursor: pointer;
+    }
+
+    .switch::after {
+      content: "";
+      display: block;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--white);
+      transition: 160ms ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.16);
+    }
+
+    .switch.on {
+      background: var(--brand);
+    }
+
+    .switch.on::after {
+      transform: translateX(20px);
+    }
+
+    .field-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .field-title {
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    .field-desc {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .badge {
+      min-width: 72px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      color: var(--brand);
+      background: var(--brand-soft);
+      border-radius: var(--radius);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--brand);
+      margin: 14px 0 4px;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .chip {
+      height: 34px;
+      border: 1px solid #d8e4dc;
+      color: var(--brand);
+      background: var(--white);
+      border-radius: var(--radius);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .chip.active {
+      color: var(--white);
+      border-color: var(--brand);
+      background: var(--brand);
+    }
+
+    .queue-item {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 12px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .queue-item img {
+      width: 92px;
+      height: 92px;
+      object-fit: cover;
+    }
+
+    .queue-body {
+      padding: 12px 12px 12px 0;
+      min-width: 0;
+    }
+
+    .queue-title {
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .month-group {
+      margin-bottom: 24px;
+    }
+
+    .month-title {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .month-count {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .form {
+      padding: 16px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      height: 42px;
+      margin-top: 8px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #f6f8f4;
+      color: var(--text);
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .select-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .select-card {
+      position: relative;
+      height: 112px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 3px solid transparent;
+      cursor: pointer;
+      background: #edf1ec;
+    }
+
+    .select-card.selected {
+      border-color: var(--brand);
+    }
+
+    .select-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .check {
+      position: absolute;
+      right: 6px;
+      top: 6px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: var(--white);
+      background: rgba(47, 107, 85, 0.92);
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .task {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .task-title {
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .status-pill {
+      flex: 0 0 auto;
+      color: var(--brand);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .empty {
+      padding: 24px 18px;
+    }
+
+    .empty-title {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .tabs {
+      height: 72px;
+      padding: 6px 10px max(6px, env(safe-area-inset-bottom));
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: var(--white);
+      border-top: 1px solid var(--line);
+    }
+
+    .tab {
+      display: grid;
+      place-items: center;
+      gap: 3px;
+      border: 0;
+      background: transparent;
+      color: #6e7469;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .tab svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 2;
+    }
+
+    .tab.active {
+      color: var(--brand);
+      font-weight: 800;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 34px;
+      transform: translateX(-50%) translateY(120px);
+      opacity: 0;
+      background: rgba(35, 48, 41, 0.92);
+      color: var(--white);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      transition: 180ms ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 520px) {
+      .stage {
+        padding: 0;
+      }
+
+      .phone {
+        width: 100%;
+        height: 100vh;
+        min-height: 100vh;
+        border-radius: 0;
+        border: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <section class="phone" aria-label="成长时光小程序原型">
+      <div class="status">
+        <span>9:41</span>
+        <span>5G 100%</span>
+      </div>
+      <div class="nav" id="navTitle">成长时光</div>
+
+      <div class="screen">
+        <section class="view active" data-view="home">
+          <div class="account-strip" data-go="account">
+            <div class="account-avatar" id="accountAvatar">游</div>
+            <div>
+              <div class="account-name" id="accountName">游客模式</div>
+              <div class="meta" id="accountHint">照片仅保存在当前设备</div>
+            </div>
+            <div class="account-action" id="accountAction">注册 / 登录 ›</div>
+          </div>
+
+          <div class="hero">
+            <div>
+              <span class="pill">Baby Growth</span>
+              <h1 class="title">宝宝的成长历程</h1>
+              <p class="subtitle">把照片按拍摄时间与地点整理成成长档案，保留清晰画质，也能挑选片段生成纪念短视频。</p>
+            </div>
+            <div class="actions">
+              <button class="btn primary" data-go="upload">上传整理</button>
+              <button class="btn ghost" data-go="video">生成视频</button>
+            </div>
+          </div>
+
+          <div class="stats section">
+            <div class="stat panel"><strong>128</strong><span>已整理照片</span></div>
+            <div class="stat panel"><strong>9</strong><span>成长月份</span></div>
+            <div class="stat panel"><strong>3</strong><span>视频任务</span></div>
+          </div>
+
+          <div class="section panel storage-card">
+            <div class="section-head">
+              <div>
+                <div class="section-title">省钱存储</div>
+                <div class="meta">展示图热存储，原图按需 Wi-Fi 备份</div>
+              </div>
+              <div class="storage-badge">86/128</div>
+            </div>
+            <div class="bar-row">
+              <span>展示图</span>
+              <div class="bar-track"><div class="bar-fill display"></div></div>
+              <span>1.9GB</span>
+            </div>
+            <div class="bar-row">
+              <span>原图估算</span>
+              <div class="bar-track"><div class="bar-fill original"></div></div>
+              <span>6.1GB</span>
+            </div>
+            <div class="saving-text">默认只上传展示图和索引，预计减少约 4.2GB 热存储与加载成本。</div>
+          </div>
+
+          <div class="section">
+            <div class="section-head">
+              <div class="section-title">最近照片</div>
+              <div class="link" data-go="albums">查看全部</div>
+            </div>
+            <div class="grid-2" id="recentPhotos"></div>
+          </div>
+        </section>
+
+        <section class="view" data-view="account">
+          <h1 class="title">账号与云同步</h1>
+          <p class="subtitle">游客数据只在本机保存。使用微信身份注册登录后，可将成长照片索引和展示图安全同步到云端。</p>
+
+          <div class="section panel login-panel" id="guestPanel">
+            <span class="pill">当前：游客本地模式</span>
+            <div class="field section">
+              <div class="field-title">宝宝昵称</div>
+              <input id="babyName" value="宝宝" maxlength="16">
+            </div>
+            <label class="agreement">
+              <input id="agreement" type="checkbox">
+              <span>我同意使用微信身份创建成长账号，并将我主动同步的内容保存到云端。</span>
+            </label>
+            <button class="btn primary" id="loginButton" style="width: 100%;">微信注册 / 登录</button>
+            <div class="meta" style="margin-top: 12px; text-align: center;">首次使用自动注册，再次使用同一微信身份可直接登录。</div>
+          </div>
+
+          <div class="section panel login-panel" id="profilePanel" hidden>
+            <div class="account-strip" style="padding-bottom: 0;">
+              <div class="account-avatar">微</div>
+              <div>
+                <div class="account-name">微信用户</div>
+                <div class="meta">账号已登录 · 云同步可用</div>
+              </div>
+            </div>
+            <div class="sync-summary">
+              <div><strong>128</strong><span>本地照片</span></div>
+              <div><strong id="syncedCount">86</strong><span>已同步</span></div>
+              <div><strong id="pendingCount">42</strong><span>待同步</span></div>
+            </div>
+            <button class="btn primary" id="syncButton" style="width: 100%;">同步本地照片到云端</button>
+            <button class="btn ghost section" id="logoutButton" style="width: 100%;">退出登录</button>
+          </div>
+
+          <div class="section panel login-panel">
+            <div class="section-title">数据保存规则</div>
+            <div class="saving-note section">游客不产生云存储费用；登录后默认只同步压缩展示图和索引，高清原图仍按需开启。</div>
+          </div>
+        </section>
+
+        <section class="view" data-view="upload">
+          <h1 class="title">图片高清整理</h1>
+          <p class="subtitle">选择宝宝照片后，会读取照片内的拍摄日期和 GPS 信息，并以高质量参数生成更适合小程序保存与分享的版本。</p>
+
+          <div class="section panel control">
+            <div class="switch-row">
+              <div>
+                <div class="field-title">存储方案</div>
+                <div class="field-desc" id="storageModeText">省钱模式：仅上传展示图和索引</div>
+              </div>
+              <button class="switch" id="backupSwitch" aria-label="高清备份开关"></button>
+            </div>
+            <div class="saving-note">默认只上传展示图和照片索引；开启高清备份后，仅在 Wi-Fi 下额外上传原图。</div>
+            <div class="field-row">
+              <div>
+                <div class="field-title">压缩质量</div>
+                <div class="field-desc">数值越高越接近原图，体积越大</div>
+              </div>
+              <div class="badge" id="qualityBadge">92%</div>
+            </div>
+            <input id="quality" type="range" min="70" max="98" value="92">
+            <div class="field-row section">
+              <div>
+                <div class="field-title">最长边限制</div>
+                <div class="field-desc">默认 4096px，兼顾清晰度与体积</div>
+              </div>
+              <div class="badge" id="sideBadge">4096px</div>
+            </div>
+            <div class="segmented" id="sideOptions">
+              <button class="chip">2048</button>
+              <button class="chip">3072</button>
+              <button class="chip active">4096</button>
+            </div>
+            <button class="btn primary section" id="simulateUpload" style="width: 100%;">模拟选择照片</button>
+          </div>
+
+          <div class="section">
+            <div class="section-head">
+              <div class="section-title">本次处理</div>
+              <div class="meta" id="queueCount">3 张</div>
+            </div>
+            <div id="queue"></div>
+          </div>
+        </section>
+
+        <section class="view" data-view="albums">
+          <h1 class="title">成长相册</h1>
+          <p class="subtitle">照片会按拍摄月份自动整理；带 GPS 信息的照片会显示拍摄坐标，后续可接入地图逆地理编码显示城市与地点名。</p>
+          <div class="section" id="albumGroups"></div>
+        </section>
+
+        <section class="view" data-view="video">
+          <h1 class="title">AI 成长短视频</h1>
+          <p class="subtitle">从已整理照片中选择片段，生成满月、生日、旅行或日常主题短视频。真实生成能力通过云函数接入视频模型服务。</p>
+
+          <div class="section panel form">
+            <div class="saving-note">视频生成优先复用已上传照片 fileID，没有 fileID 时才临时上传素材，避免重复消耗流量和云存储。</div>
+            <div class="field">
+              <div class="field-title">视频主题</div>
+              <input id="theme" value="一岁生日成长回忆">
+            </div>
+            <div class="split">
+              <div class="field">
+                <div class="field-title">视频风格</div>
+                <select id="style">
+                  <option>温暖纪实</option>
+                  <option>童话绘本</option>
+                  <option>清新胶片</option>
+                  <option>生日派对</option>
+                </select>
+              </div>
+              <div class="field">
+                <div class="field-title">时长</div>
+                <select id="duration">
+                  <option>10秒</option>
+                  <option selected>15秒</option>
+                  <option>30秒</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn primary" id="createVideo" style="width: 100%;">生成短视频</button>
+          </div>
+
+          <div class="section">
+            <div class="section-head">
+              <div class="section-title">选择照片</div>
+              <div class="meta">已选 <span id="selectedCount">6</span> 张</div>
+            </div>
+            <div class="select-grid" id="selectGrid"></div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">生成记录</div>
+            <div id="taskList" style="margin-top: 12px;"></div>
+          </div>
+        </section>
+      </div>
+
+      <nav class="tabs" aria-label="底部导航">
+        <button class="tab active" data-go="home" aria-label="首页">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 11 9-8 9 8"></path><path d="M5 10v10h14V10"></path><path d="M10 20v-6h4v6"></path></svg>
+          <span>首页</span>
+        </button>
+        <button class="tab" data-go="upload" aria-label="整理">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M17 8 12 3 7 8"></path><path d="M12 3v12"></path></svg>
+          <span>整理</span>
+        </button>
+        <button class="tab" data-go="albums" aria-label="相册">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"></path></svg>
+          <span>相册</span>
+        </button>
+        <button class="tab" data-go="video" aria-label="视频">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m22 8-6 4 6 4V8Z"></path><rect x="2" y="6" width="14" height="12" rx="2"></rect></svg>
+          <span>视频</span>
+        </button>
+      </nav>
+    </section>
+  </main>
+
+  <div class="toast" id="toast">已提交</div>
+
+  <script>
+    const photos = [
+      { id: 1, date: "2026-06-18", month: "2026年06月", place: "31.2304, 121.4737", img: "https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=500&q=80" },
+      { id: 2, date: "2026-06-12", month: "2026年06月", place: "上海 儿童公园", img: "https://images.unsplash.com/photo-1546015720-b8b30df5aa27?auto=format&fit=crop&w=500&q=80" },
+      { id: 3, date: "2026-05-29", month: "2026年05月", place: "未记录位置", img: "https://images.unsplash.com/photo-1546015720-48f8f5c8c5b0?auto=format&fit=crop&w=500&q=80" },
+      { id: 4, date: "2026-05-08", month: "2026年05月", place: "31.2141, 121.4598", img: "https://images.unsplash.com/photo-1590649880765-91b1956b8276?auto=format&fit=crop&w=500&q=80" },
+      { id: 5, date: "2026-04-20", month: "2026年04月", place: "杭州 西湖", img: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=500&q=80" },
+      { id: 6, date: "2026-04-02", month: "2026年04月", place: "未记录位置", img: "https://images.unsplash.com/photo-1522771930-78848d9293e8?auto=format&fit=crop&w=500&q=80" }
+    ];
+
+    const queueItems = [
+      { title: "已整理", date: "2026-06-18", place: "31.2304, 121.4737", size: "5.8MB -> 1.9MB，节省 67%", img: photos[0].img },
+      { title: "已整理", date: "2026-06-12", place: "上海 儿童公园", size: "4.1MB -> 1.5MB，节省 63%", img: photos[1].img },
+      { title: "高清压缩中", date: "2026-05-29", place: "未记录位置", size: "3.6MB -> 处理中", img: photos[2].img }
+    ];
+
+    const tasks = [
+      { title: "一岁生日成长回忆", meta: "温暖纪实 · 15秒 · 12张", id: "mock_1788421022", status: "排队中" },
+      { title: "第一次旅行", meta: "清新胶片 · 30秒 · 18张", id: "mock_1788342401", status: "已完成" }
+    ];
+
+    const titles = {
+      home: "成长时光",
+      account: "账号与云同步",
+      upload: "图片整理",
+      albums: "成长相册",
+      video: "AI 视频"
+    };
+
+    const selected = new Set(photos.map((photo) => photo.id));
+    let loggedIn = false;
+
+    function card(photo) {
+      return `
+        <article class="photo-card panel">
+          <img src="${photo.img}" alt="宝宝照片">
+          <div class="photo-meta">
+            <div class="photo-date">${photo.date}</div>
+            <div class="photo-place">${photo.place}</div>
+          </div>
+        </article>
+      `;
+    }
+
+    function render() {
+      document.querySelector("#recentPhotos").innerHTML = photos.slice(0, 4).map(card).join("");
+      document.querySelector("#queue").innerHTML = queueItems.map((item) => `
+        <article class="queue-item panel">
+          <img src="${item.img}" alt="处理中的照片">
+          <div class="queue-body">
+            <div class="queue-title">${item.title}</div>
+            <div class="meta">${item.date} · ${item.place}</div>
+            <div class="meta">${item.size}</div>
+          </div>
+        </article>
+      `).join("");
+
+      const grouped = photos.reduce((acc, photo) => {
+        acc[photo.month] = acc[photo.month] || [];
+        acc[photo.month].push(photo);
+        return acc;
+      }, {});
+
+      document.querySelector("#albumGroups").innerHTML = Object.keys(grouped).map((month) => `
+        <section class="month-group">
+          <div class="section-head">
+            <div>
+              <div class="month-title">${month}</div>
+              <div class="month-count">${grouped[month].length} 张照片</div>
+            </div>
+          </div>
+          <div class="grid-2">${grouped[month].map(card).join("")}</div>
+        </section>
+      `).join("");
+
+      document.querySelector("#selectGrid").innerHTML = photos.map((photo) => `
+        <div class="select-card ${selected.has(photo.id) ? "selected" : ""}" data-photo="${photo.id}">
+          <img src="${photo.img}" alt="可选照片">
+          <div class="check">${selected.has(photo.id) ? "✓" : ""}</div>
+        </div>
+      `).join("");
+
+      document.querySelector("#selectedCount").textContent = selected.size;
+      document.querySelector("#taskList").innerHTML = tasks.map((task) => `
+        <article class="task panel">
+          <div>
+            <div class="task-title">${task.title}</div>
+            <div class="meta">${task.meta}</div>
+            <div class="meta">任务：${task.id}</div>
+          </div>
+          <div class="status-pill">${task.status}</div>
+        </article>
+      `).join("");
+    }
+
+    function switchView(name) {
+      document.querySelectorAll(".view").forEach((view) => {
+        view.classList.toggle("active", view.dataset.view === name);
+      });
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.classList.toggle("active", tab.dataset.go === name);
+      });
+      document.querySelector("#navTitle").textContent = titles[name];
+    }
+
+    function renderAccount() {
+      document.querySelector("#guestPanel").hidden = loggedIn;
+      document.querySelector("#profilePanel").hidden = !loggedIn;
+      document.querySelector("#accountAvatar").textContent = loggedIn ? "微" : "游";
+      document.querySelector("#accountName").textContent = loggedIn ? "微信用户" : "游客模式";
+      document.querySelector("#accountHint").textContent = loggedIn ? "云端同步已开启" : "照片仅保存在当前设备";
+      document.querySelector("#accountAction").textContent = loggedIn ? "管理 ›" : "注册 / 登录 ›";
+      document.querySelector("#storageModeText").textContent = loggedIn
+        ? "省钱模式：仅上传展示图和索引"
+        : "游客模式：照片仅保存在当前设备";
+    }
+
+    function showToast(text) {
+      const toast = document.querySelector("#toast");
+      toast.textContent = text;
+      toast.classList.add("show");
+      window.setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    document.addEventListener("click", (event) => {
+      const go = event.target.closest("[data-go]");
+      if (go) {
+        switchView(go.dataset.go);
+      }
+
+      const photo = event.target.closest("[data-photo]");
+      if (photo) {
+        const id = Number(photo.dataset.photo);
+        if (selected.has(id)) {
+          selected.delete(id);
+        } else {
+          selected.add(id);
+        }
+        render();
+      }
+    });
+
+    document.querySelector("#quality").addEventListener("input", (event) => {
+      document.querySelector("#qualityBadge").textContent = `${event.target.value}%`;
+    });
+
+    document.querySelector("#sideOptions").addEventListener("click", (event) => {
+      const chip = event.target.closest(".chip");
+      if (!chip) return;
+      document.querySelectorAll("#sideOptions .chip").forEach((item) => item.classList.remove("active"));
+      chip.classList.add("active");
+      document.querySelector("#sideBadge").textContent = `${chip.textContent}px`;
+    });
+
+    document.querySelector("#backupSwitch").addEventListener("click", (event) => {
+      if (!loggedIn) {
+        switchView("account");
+        showToast("登录后可开启云端高清备份");
+        return;
+      }
+      const enabled = event.currentTarget.classList.toggle("on");
+      document.querySelector("#storageModeText").textContent = enabled
+        ? "高清备份：Wi-Fi 下额外上传原图"
+        : "省钱模式：仅上传展示图和索引";
+      showToast(enabled ? "已开启高清备份" : "已切回省钱模式");
+    });
+
+    document.querySelector("#simulateUpload").addEventListener("click", () => {
+      queueItems.unshift({
+        title: "读取拍摄信息中",
+        date: "识别中",
+        place: "识别中",
+        size: "6.2MB",
+        img: photos[3].img
+      });
+      document.querySelector("#queueCount").textContent = `${queueItems.length} 张`;
+      render();
+      showToast("已加入处理队列");
+    });
+
+    document.querySelector("#createVideo").addEventListener("click", () => {
+      if (!selected.size) {
+        showToast("请选择照片");
+        return;
+      }
+      const title = document.querySelector("#theme").value || "宝宝成长回忆";
+      const style = document.querySelector("#style").value;
+      const duration = document.querySelector("#duration").value;
+      tasks.unshift({
+        title,
+        meta: `${style} · ${duration} · ${selected.size}张`,
+        id: `mock_${Date.now()}`,
+        status: "排队中"
+      });
+      render();
+      showToast("视频任务已提交");
+    });
+
+    document.querySelector("#loginButton").addEventListener("click", () => {
+      if (!document.querySelector("#agreement").checked) {
+        showToast("请先同意账号与云存储说明");
+        return;
+      }
+      loggedIn = true;
+      renderAccount();
+      showToast("注册成功，云同步已开启");
+    });
+
+    document.querySelector("#syncButton").addEventListener("click", () => {
+      document.querySelector("#syncedCount").textContent = "128";
+      document.querySelector("#pendingCount").textContent = "0";
+      showToast("本地照片已同步到云端");
+    });
+
+    document.querySelector("#logoutButton").addEventListener("click", () => {
+      loggedIn = false;
+      document.querySelector("#backupSwitch").classList.remove("on");
+      renderAccount();
+      showToast("已退出，后续内容仅保存在本机");
+    });
+
+    render();
+    renderAccount();
+  </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<view class="page video-page">
+  <view class="title">AI 成长短视频</view>
+  <view class="subtitle">从已整理照片中选择片段，生成满月、生日、旅行或日常主题短视频。真实生成能力通过云函数接入视频模型服务。</view>
+
+  <view class="section panel form-panel">
+    <view class="field">
+      <view class="field-title">视频主题</view>
+      <input value="{{theme}}" placeholder="例如：一岁生日、第一次旅行" bindinput="onThemeInput" />
+    </view>
+
+    <view class="field split-field">
+      <view>
+        <view class="field-title">视频风格</view>
+        <picker range="{{styles}}" value="{{styleIndex}}" bindchange="onStyleChange">
+          <view class="picker-box">{{styles[styleIndex]}}</view>
+        </picker>
+      </view>
+      <view>
+        <view class="field-title">时长</view>
+        <picker range="{{durations}}" value="{{durationIndex}}" bindchange="onDurationChange">
+          <view class="picker-box">{{durations[durationIndex]}}秒</view>
+        </picker>
+      </view>
+    </view>
+
+    <button class="primary-btn create-btn" loading="{{creating}}" disabled="{{creating || !selectedCount}}" bindtap="createVideo">
+      {{creating ? "提交中" : "生成短视频"}}
+    </button>
+  </view>
+
+  <view class="section section-head">
+    <view class="section-title">选择照片</view>
+    <view class="muted">已选 {{selectedCount}} 张</view>
+  </view>
+
+  <view wx:if="{{photos.length}}" class="select-grid">
+    <view wx:for="{{photos}}" wx:key="id" class="select-card {{item.selected ? 'selected' : ''}}" bindtap="togglePhoto" data-id="{{item.id}}">
+      <image src="{{item.compressedPath || item.path}}" mode="aspectFill"></image>
+      <view class="checkmark">{{item.selected ? "✓" : ""}}</view>
+    </view>
+  </view>
+
+  <view wx:else class="empty panel">
+    <view class="empty-title">先整理几张照片</view>
+    <view class="empty-text">AI 视频会使用“相册”里已经整理好的照片作为素材。</view>
+    <button class="primary-btn empty-btn" bindtap="goUpload">去整理</button>
+  </view>
+
+  <view wx:if="{{videos.length}}" class="section">
+    <view class="section-title">生成记录</view>
+    <view class="task-list">
+      <view wx:for="{{videos}}" wx:key="id" class="task panel">
+        <view class="task-main">
+          <view class="task-title">{{item.theme}}</view>
+          <view class="task-meta">{{item.style}} · {{item.duration}}秒 · {{item.photoCount}}张</view>
+          <view class="task-meta">任务：{{item.taskId}}</view>
+        </view>
+        <view class="task-status">{{item.statusText}}</view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,99 @@
+function getImageInfo(src) {
+  return new Promise((resolve, reject) => {
+    wx.getImageInfo({
+      src,
+      success: resolve,
+      fail: reject
+    });
+  });
+}
+
+function canvasToTempFilePath(options, context) {
+  return new Promise((resolve, reject) => {
+    wx.canvasToTempFilePath({
+      ...options,
+      success: (res) => resolve(res.tempFilePath),
+      fail: reject
+    }, context);
+  });
+}
+
+function getFileInfo(filePath) {
+  return new Promise((resolve) => {
+    wx.getFileInfo({
+      filePath,
+      success: resolve,
+      fail: () => resolve({ size: 0 })
+    });
+  });
+}
+
+function saveTempFile(tempFilePath) {
+  return new Promise((resolve) => {
+    wx.saveFile({
+      tempFilePath,
+      success: (res) => resolve(res.savedFilePath),
+      fail: () => resolve(tempFilePath)
+    });
+  });
+}
+
+function calcTargetSize(width, height, maxSide) {
+  const longSide = Math.max(width, height);
+  if (longSide <= maxSide) {
+    return { width, height };
+  }
+  const ratio = maxSide / longSide;
+  return {
+    width: Math.round(width * ratio),
+    height: Math.round(height * ratio)
+  };
+}
+
+async function compressPhoto(page, filePath, options = {}) {
+  const quality = options.quality || 92;
+  const maxSide = options.maxSide || 4096;
+  const info = await getImageInfo(filePath);
+  const target = calcTargetSize(info.width, info.height, maxSide);
+
+  page.setData({
+    canvasWidth: target.width,
+    canvasHeight: target.height
+  });
+
+  const ctx = wx.createCanvasContext("compressCanvas", page);
+  ctx.clearRect(0, 0, target.width, target.height);
+  ctx.drawImage(filePath, 0, 0, target.width, target.height);
+
+  await new Promise((resolve) => ctx.draw(false, resolve));
+  const outputPath = await canvasToTempFilePath({
+    canvasId: "compressCanvas",
+    x: 0,
+    y: 0,
+    width: target.width,
+    height: target.height,
+    destWidth: target.width,
+    destHeight: target.height,
+    fileType: "jpg",
+    quality
+  }, page);
+  const savedPath = await saveTempFile(outputPath);
+
+  const originalInfo = await getFileInfo(filePath);
+  const compressedInfo = await getFileInfo(savedPath);
+
+  return {
+    path: savedPath,
+    width: target.width,
+    height: target.height,
+    originalSize: originalInfo.size,
+    compressedSize: compressedInfo.size,
+    ratio: originalInfo.size ? Math.round((1 - compressedInfo.size / originalInfo.size) * 100) : 0
+  };
+}
+
+module.exports = {
+  compressPhoto,
+  getFileInfo,
+  saveTempFile
+};

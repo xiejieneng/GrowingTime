@@ -1,0 +1,80 @@
+<view class="page home-page">
+  <view class="account-strip" bindtap="goAccount">
+    <view class="account-avatar">{{accountInitial}}</view>
+    <view class="account-copy">
+      <view class="account-name">{{accountName}}</view>
+      <view class="account-hint">{{accountHint}}</view>
+    </view>
+    <view class="account-action">{{loggedIn ? "管理" : "注册 / 登录"}} ›</view>
+  </view>
+
+  <view class="hero">
+    <view>
+      <text class="pill">Baby Growth</text>
+      <view class="title hero-title">{{babyName}}的成长历程</view>
+      <view class="subtitle">把照片按拍摄时间与地点整理成成长档案，保留清晰画质，也能挑选片段生成纪念短视频。</view>
+    </view>
+    <view class="hero-actions">
+      <button class="primary-btn action-btn" bindtap="goUpload">上传整理</button>
+      <button class="ghost-btn action-btn" bindtap="goVideo">生成视频</button>
+    </view>
+  </view>
+
+  <view class="stats section">
+    <view class="stat panel">
+      <view class="stat-value">{{photoCount}}</view>
+      <view class="stat-label">已整理照片</view>
+    </view>
+    <view class="stat panel">
+      <view class="stat-value">{{albumCount}}</view>
+      <view class="stat-label">成长月份</view>
+    </view>
+    <view class="stat panel">
+      <view class="stat-value">{{videoCount}}</view>
+      <view class="stat-label">视频任务</view>
+    </view>
+  </view>
+
+  <view class="section panel storage-card">
+    <view class="section-head storage-head">
+      <view>
+        <view class="section-title">省钱存储</view>
+        <view class="storage-desc">{{storageModeText}}</view>
+      </view>
+      <view class="storage-badge">{{cloudPhotos}}/{{photoCount}}</view>
+    </view>
+    <view class="storage-bars">
+      <view class="bar-row">
+        <view class="bar-label">展示图</view>
+        <view class="bar-track"><view class="bar-fill display" style="width: {{displayPercent}}%;"></view></view>
+        <view class="bar-size">{{displaySizeText}}</view>
+      </view>
+      <view class="bar-row">
+        <view class="bar-label">原图估算</view>
+        <view class="bar-track"><view class="bar-fill original" style="width: {{originalPercent}}%;"></view></view>
+        <view class="bar-size">{{originalSizeText}}</view>
+      </view>
+    </view>
+    <view class="saving-text">已减少约 {{savedSizeText}} 的热存储与加载成本。</view>
+  </view>
+
+  <view class="section section-head">
+    <view class="section-title">最近照片</view>
+    <view class="link" bindtap="goAlbums">查看全部</view>
+  </view>
+
+  <view wx:if="{{recentPhotos.length}}" class="recent-grid">
+    <view wx:for="{{recentPhotos}}" wx:key="id" class="photo-card panel">
+      <image src="{{item.compressedPath || item.path}}" mode="aspectFill"></image>
+      <view class="photo-meta">
+        <view class="photo-date">{{item.displayDate}}</view>
+        <view class="photo-place">{{item.placeText}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="empty panel">
+    <view class="empty-title">还没有照片</view>
+    <view class="empty-text">从手机相册选择宝宝照片，系统会尝试读取拍摄日期和 GPS 信息并自动归档。</view>
+  </view>
+</view>

@@ -1,0 +1,20 @@
+{
+  "description": "Baby growth timeline mini program",
+  "packOptions": {
+    "ignore": []
+  },
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "newFeature": true
+  },
+  "compileType": "miniprogram",
+  "libVersion": "latest",
+  "appid": "touristappid",
+  "projectname": "baby-growth-miniapp",
+  "condition": {},
+  "cloudfunctionRoot": "cloudfunctions/"
+}

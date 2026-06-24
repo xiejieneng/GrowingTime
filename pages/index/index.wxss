@@ -1,0 +1,251 @@
+.home-page {
+  padding-bottom: 48rpx;
+}
+
+.account-strip {
+  display: grid;
+  grid-template-columns: 72rpx 1fr auto;
+  align-items: center;
+  gap: 18rpx;
+  padding: 18rpx 4rpx 24rpx;
+}
+
+.account-avatar {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  background: #2f6b55;
+  border-radius: 50%;
+  font-weight: 700;
+}
+
+.account-name {
+  font-weight: 700;
+}
+
+.account-hint {
+  margin-top: 4rpx;
+  color: #758076;
+  font-size: 23rpx;
+}
+
+.account-action {
+  color: #2f6b55;
+  font-size: 25rpx;
+  font-weight: 600;
+}
+
+.hero {
+  min-height: 360rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40rpx 32rpx;
+  border-radius: 8rpx;
+  color: #ffffff;
+  background:
+    linear-gradient(135deg, rgba(36, 95, 74, 0.96), rgba(116, 165, 109, 0.84) 56%, rgba(241, 182, 107, 0.9)),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.14) 0, rgba(255, 255, 255, 0.14) 2rpx, transparent 2rpx, transparent 32rpx);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero > view {
+  position: relative;
+  z-index: 1;
+}
+
+.hero .pill {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.hero-title {
+  margin-top: 20rpx;
+  color: #ffffff;
+}
+
+.hero .subtitle {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.hero-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20rpx;
+  margin-top: 34rpx;
+}
+
+.action-btn {
+  height: 88rpx;
+  line-height: 88rpx;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+}
+
+.stat {
+  padding: 24rpx 16rpx;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #2f6b55;
+}
+
+.stat-label {
+  margin-top: 8rpx;
+  color: #758076;
+  font-size: 24rpx;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.link {
+  color: #2f6b55;
+  font-size: 26rpx;
+}
+
+.storage-card {
+  padding: 26rpx;
+}
+
+.storage-head {
+  margin-top: 0;
+}
+
+.storage-desc {
+  margin-top: 8rpx;
+  color: #758076;
+  font-size: 24rpx;
+  line-height: 1.4;
+}
+
+.storage-badge {
+  min-width: 96rpx;
+  height: 52rpx;
+  line-height: 52rpx;
+  text-align: center;
+  color: #2f6b55;
+  background: #edf5ef;
+  border-radius: 8rpx;
+  font-weight: 700;
+}
+
+.storage-bars {
+  margin-top: 22rpx;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 112rpx 1fr 112rpx;
+  align-items: center;
+  gap: 14rpx;
+  margin-top: 16rpx;
+}
+
+.bar-label,
+.bar-size {
+  color: #758076;
+  font-size: 24rpx;
+}
+
+.bar-size {
+  text-align: right;
+}
+
+.bar-track {
+  height: 16rpx;
+  overflow: hidden;
+  background: #edf1ec;
+  border-radius: 999rpx;
+}
+
+.bar-fill {
+  height: 100%;
+  min-width: 8rpx;
+  border-radius: 999rpx;
+}
+
+.bar-fill.display {
+  background: #2f6b55;
+}
+
+.bar-fill.original {
+  background: #f1b66b;
+}
+
+.saving-text {
+  margin-top: 18rpx;
+  color: #8a5a12;
+  background: #fff8ec;
+  border: 1rpx solid #f4dfbd;
+  border-radius: 8rpx;
+  padding: 16rpx;
+  font-size: 24rpx;
+  line-height: 1.4;
+}
+
+.recent-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18rpx;
+  margin-top: 18rpx;
+}
+
+.photo-card {
+  overflow: hidden;
+}
+
+.photo-card image {
+  width: 100%;
+  height: 220rpx;
+  display: block;
+}
+
+.photo-meta {
+  padding: 16rpx;
+}
+
+.photo-date {
+  font-weight: 600;
+}
+
+.photo-place {
+  margin-top: 6rpx;
+  color: #758076;
+  font-size: 24rpx;
+}
+
+.empty {
+  margin-top: 18rpx;
+  padding: 40rpx 32rpx;
+}
+
+.empty-title {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.empty-text {
+  margin-top: 12rpx;
+  color: #758076;
+  line-height: 1.55;
+}

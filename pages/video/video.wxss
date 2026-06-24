@@ -1,0 +1,146 @@
+.video-page {
+  padding-bottom: 80rpx;
+}
+
+.form-panel {
+  padding: 28rpx;
+}
+
+.field + .field {
+  margin-top: 28rpx;
+}
+
+.field-title {
+  font-weight: 700;
+  margin-bottom: 12rpx;
+}
+
+input,
+.picker-box {
+  height: 76rpx;
+  line-height: 76rpx;
+  padding: 0 20rpx;
+  box-sizing: border-box;
+  background: #f6f8f4;
+  border: 1rpx solid #e2e8df;
+  border-radius: 8rpx;
+}
+
+.split-field {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18rpx;
+}
+
+.create-btn {
+  margin-top: 32rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.select-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14rpx;
+  margin-top: 18rpx;
+}
+
+.select-card {
+  position: relative;
+  height: 212rpx;
+  border-radius: 8rpx;
+  overflow: hidden;
+  border: 4rpx solid transparent;
+  background: #edf1ec;
+}
+
+.select-card image {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.select-card.selected {
+  border-color: #2f6b55;
+}
+
+.checkmark {
+  position: absolute;
+  right: 10rpx;
+  top: 10rpx;
+  width: 42rpx;
+  height: 42rpx;
+  line-height: 42rpx;
+  text-align: center;
+  border-radius: 50%;
+  color: #ffffff;
+  background: rgba(47, 107, 85, 0.92);
+  font-weight: 700;
+}
+
+.task-list {
+  margin-top: 18rpx;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+}
+
+.task-main {
+  min-width: 0;
+}
+
+.task-title {
+  font-weight: 700;
+}
+
+.task-meta {
+  margin-top: 8rpx;
+  color: #758076;
+  font-size: 24rpx;
+  word-break: break-all;
+}
+
+.task-status {
+  flex: 0 0 auto;
+  color: #2f6b55;
+  font-weight: 700;
+}
+
+.empty {
+  margin-top: 18rpx;
+  padding: 40rpx 32rpx;
+}
+
+.empty-title {
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.empty-text {
+  margin-top: 12rpx;
+  color: #758076;
+  line-height: 1.55;
+}
+
+.empty-btn {
+  margin-top: 30rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+}
