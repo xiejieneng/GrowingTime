@@ -9,10 +9,11 @@
     "enhance": true,
     "postcss": true,
     "minified": true,
-    "newFeature": true
+    "newFeature": true,
+    "minifyWXML": true
   },
   "compileType": "miniprogram",
-  "libVersion": "latest",
+  "libVersion": "3.16.2",
   "appid": "touristappid",
   "projectname": "baby-growth-miniapp",
   "condition": {},
