@@ -48,6 +48,12 @@ input,
   font-weight: 700;
 }
 
+.link {
+  color: #2f6b55;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
 .select-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -102,6 +108,7 @@ input,
 }
 
 .task-main {
+  flex: 1;
   min-width: 0;
 }
 
@@ -117,9 +124,97 @@ input,
 }
 
 .task-status {
-  flex: 0 0 auto;
   color: #2f6b55;
   font-weight: 700;
+  font-size: 24rpx;
+  text-align: right;
+}
+
+.task-status.failed {
+  color: #b34136;
+}
+
+.task-side {
+  flex: 0 0 150rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.task-play {
+  width: 150rpx;
+  min-height: 58rpx;
+  height: 58rpx;
+  margin-top: 14rpx;
+  padding: 0;
+  color: #ffffff;
+  background: #2f6b55;
+  border-radius: 8rpx;
+  font-size: 23rpx;
+}
+
+.player-mask {
+  position: fixed;
+  z-index: 100;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(22, 31, 26, 0.58);
+}
+
+.player-sheet {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 28rpx 28rpx calc(32rpx + env(safe-area-inset-bottom));
+  background: #ffffff;
+  border-radius: 12rpx 12rpx 0 0;
+}
+
+.player-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.player-title {
+  flex: 1;
+  min-width: 0;
+  padding-right: 20rpx;
+  font-size: 32rpx;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-close {
+  color: #2f6b55;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.online-player {
+  width: 100%;
+  height: 390rpx;
+  background: #111111;
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+
+.player-error {
+  margin-top: 16rpx;
+  color: #b34136;
+  font-size: 24rpx;
+}
+
+.player-meta {
+  margin-top: 18rpx;
+  color: #758076;
+  font-size: 24rpx;
 }
 
 .empty {

@@ -81,6 +81,12 @@ function addVideo(video) {
   saveVideos([video].concat(current));
 }
 
+function updateVideo(id, patch) {
+  const videos = getVideos().map((video) => video.id === id ? { ...video, ...patch } : video);
+  saveVideos(videos);
+  return videos.find((video) => video.id === id);
+}
+
 module.exports = {
   getPhotos,
   savePhotos,
@@ -90,5 +96,6 @@ module.exports = {
   getStorageStats,
   getVideos,
   saveVideos,
-  addVideo
+  addVideo,
+  updateVideo
 };

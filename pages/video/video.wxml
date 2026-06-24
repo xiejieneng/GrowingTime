@@ -47,7 +47,10 @@
   </view>
 
   <view wx:if="{{videos.length}}" class="section">
-    <view class="section-title">生成记录</view>
+    <view class="section-head">
+      <view class="section-title">生成记录</view>
+      <view class="link refresh-link" bindtap="refreshTasks">{{refreshing ? "刷新中" : "刷新状态"}}</view>
+    </view>
     <view class="task-list">
       <view wx:for="{{videos}}" wx:key="id" class="task panel">
         <view class="task-main">
@@ -55,8 +58,35 @@
           <view class="task-meta">{{item.style}} · {{item.duration}}秒 · {{item.photoCount}}张</view>
           <view class="task-meta">任务：{{item.taskId}}</view>
         </view>
-        <view class="task-status">{{item.statusText}}</view>
+        <view class="task-side">
+          <view class="task-status {{item.failed ? 'failed' : ''}}">{{item.statusText}}</view>
+          <button wx:if="{{item.playable}}" class="task-play" hover-class="button-pressed" data-id="{{item.id}}" bindtap="playVideo">在线播放</button>
+        </view>
       </view>
+    </view>
+  </view>
+
+  <view wx:if="{{activeVideo}}" class="player-mask">
+    <view class="player-sheet">
+      <view class="player-head">
+        <view class="player-title">{{activeVideo.theme}}</view>
+        <view class="player-close" bindtap="closePlayer">关闭</view>
+      </view>
+      <video
+        id="growthVideo"
+        class="online-player"
+        src="{{activeVideo.src}}"
+        poster="{{activeVideo.cover}}"
+        controls
+        autoplay
+        object-fit="contain"
+        show-center-play-btn
+        show-fullscreen-btn
+        enable-play-gesture
+        binderror="onPlayerError"
+      ></video>
+      <view wx:if="{{playerError}}" class="player-error">{{playerError}}</view>
+      <view class="player-meta">{{activeVideo.style}} · {{activeVideo.duration}}秒 · {{activeVideo.photoCount}}张照片</view>
     </view>
   </view>
 </view>

@@ -15,7 +15,10 @@ Page({
     photos: [],
     selectedCount: 0,
     videos: [],
-    creating: false
+    creating: false,
+    refreshing: false,
+    activeVideo: null,
+    playerError: ""
   },
 
   onShow() {
@@ -23,12 +26,21 @@ Page({
       ...item,
       selected: index < 6
     }));
-    const videos = storage.getVideos();
+    const videos = this.decorateVideos(storage.getVideos());
     this.setData({
       photos,
       videos,
       selectedCount: photos.filter((item) => item.selected).length
     });
+  },
+
+  decorateVideos(videos) {
+    return videos.map((video) => ({
+      ...video,
+      playable: Boolean(video.videoFileId || video.videoUrl),
+      completed: video.status === "completed" || video.status === "success",
+      failed: video.status === "failed"
+    }));
   },
 
   onThemeInput(event) {
@@ -86,11 +98,15 @@ Page({
         style: payload.style,
         duration: payload.duration,
         photoCount: selected.length,
+        videoFileId: result.videoFileId || result.fileID || "",
+        videoUrl: result.videoUrl || "",
+        coverFileId: result.coverFileId || "",
+        coverUrl: result.coverUrl || "",
         createdAt: new Date().toISOString()
       };
       storage.addVideo(video);
       this.setData({
-        videos: storage.getVideos(),
+        videos: this.decorateVideos(storage.getVideos()),
         creating: false
       });
       wx.showToast({ title: "已提交", icon: "success" });
@@ -148,8 +164,132 @@ Page({
 
     return wx.cloud.callFunction({
       name: "createVideo",
-      data: payload
+      data: {
+        action: "create",
+        ...payload
+      }
     }).then((res) => res.result || {});
+  },
+
+  async resolveCloudUrl(fileID) {
+    if (!fileID) {
+      return "";
+    }
+    if (!fileID.startsWith("cloud://")) {
+      return fileID;
+    }
+    if (!auth.canUseCloud()) {
+      throw new Error("CLOUD_UNAVAILABLE");
+    }
+    const res = await wx.cloud.getTempFileURL({
+      fileList: [fileID]
+    });
+    const file = res.fileList && res.fileList[0];
+    if (!file || file.status !== 0 || !file.tempFileURL) {
+      throw new Error("VIDEO_URL_FAILED");
+    }
+    return file.tempFileURL;
+  },
+
+  async playVideo(event) {
+    const id = event.currentTarget.dataset.id;
+    const video = storage.getVideos().find((item) => item.id === id);
+    if (!video || (!video.videoFileId && !video.videoUrl)) {
+      wx.showToast({ title: "视频尚未生成完成", icon: "none" });
+      return;
+    }
+
+    wx.showLoading({ title: "加载视频" });
+    try {
+      const src = await this.resolveCloudUrl(video.videoFileId || video.videoUrl);
+      const cover = await this.resolveCloudUrl(video.coverFileId || video.coverUrl);
+      this.setData({
+        activeVideo: {
+          ...video,
+          src,
+          cover
+        },
+        playerError: ""
+      }, () => {
+        const context = wx.createVideoContext("growthVideo", this);
+        context.play();
+      });
+    } catch (error) {
+      console.warn("resolve video url failed", error);
+      wx.showToast({ title: "视频加载失败", icon: "none" });
+    } finally {
+      wx.hideLoading();
+    }
+  },
+
+  closePlayer() {
+    const context = wx.createVideoContext("growthVideo", this);
+    context.stop();
+    this.setData({
+      activeVideo: null,
+      playerError: ""
+    });
+  },
+
+  onPlayerError() {
+    this.setData({
+      playerError: "播放失败，请刷新任务或稍后重试。"
+    });
+  },
+
+  async refreshTasks() {
+    if (this.data.refreshing) {
+      return;
+    }
+    if (!auth.canUseCloud() || !auth.isLoggedIn()) {
+      wx.showToast({ title: "请登录后刷新云端任务", icon: "none" });
+      return;
+    }
+
+    const pending = storage.getVideos().filter((video) => {
+      return video.taskId && !video.videoFileId && !video.videoUrl && video.status !== "failed";
+    });
+    if (!pending.length) {
+      wx.showToast({ title: "没有待刷新的任务", icon: "none" });
+      return;
+    }
+
+    this.setData({ refreshing: true });
+    let completedCount = 0;
+    for (const video of pending) {
+      try {
+        const res = await wx.cloud.callFunction({
+          name: "createVideo",
+          data: {
+            action: "query",
+            taskId: video.taskId
+          }
+        });
+        const result = res.result || {};
+        const patch = {
+          status: result.status || video.status,
+          statusText: result.statusText || video.statusText,
+          videoFileId: result.videoFileId || result.fileID || video.videoFileId || "",
+          videoUrl: result.videoUrl || video.videoUrl || "",
+          coverFileId: result.coverFileId || video.coverFileId || "",
+          coverUrl: result.coverUrl || video.coverUrl || ""
+        };
+        storage.updateVideo(video.id, patch);
+        if (patch.videoFileId || patch.videoUrl) {
+          completedCount += 1;
+        }
+      } catch (error) {
+        console.warn("refresh video task failed", video.taskId, error);
+      }
+    }
+    this.setData({
+      videos: this.decorateVideos(storage.getVideos()),
+      refreshing: false
+    });
+    wx.showToast({
+      title: completedCount ? `${completedCount}个视频已完成` : "任务状态已刷新",
+      icon: completedCount ? "success" : "none"
+    });
   },
 
   goUpload() {
