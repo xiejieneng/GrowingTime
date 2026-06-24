@@ -15,7 +15,7 @@
     <button class="primary-btn login-btn" loading="{{loggingIn}}" disabled="{{loggingIn || !agreed}}" bindtap="login">
       微信注册 / 登录
     </button>
-    <view class="privacy-note">无需设置密码。首次使用自动注册，再次使用同一微信身份可登录。</view>
+    <view class="privacy-note">无需设置密码。首次使用自动注册；测试号仅支持本地模式，正式 AppID 才能使用云登录。</view>
   </view>
 
   <view wx:else class="section panel profile-panel">

@@ -1,5 +1,24 @@
 const SESSION_KEY = "growth_account_session";
 
+function getAppId() {
+  try {
+    const account = wx.getAccountInfoSync();
+    return account && account.miniProgram ? account.miniProgram.appId || "" : "";
+  } catch (error) {
+    return "";
+  }
+}
+
+function canUseCloud() {
+  const appId = getAppId();
+  return Boolean(
+    wx.cloud
+    && appId
+    && appId !== "touristappid"
+    && appId !== "undefined"
+  );
+}
+
 function emptySession() {
   return {
     loggedIn: false,
@@ -49,7 +68,7 @@ function clearSession() {
 }
 
 function login(profile) {
-  if (!wx.cloud) {
+  if (!canUseCloud()) {
     return Promise.reject(new Error("CLOUD_UNAVAILABLE"));
   }
   return wx.cloud.callFunction({
@@ -69,6 +88,8 @@ function login(profile) {
 }
 
 module.exports = {
+  getAppId,
+  canUseCloud,
   getSession,
   isLoggedIn,
   setSession,

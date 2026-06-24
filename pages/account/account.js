@@ -78,7 +78,7 @@ Page({
     } catch (error) {
       console.warn("account login failed", error);
       wx.showToast({
-        title: error.message === "CLOUD_UNAVAILABLE" ? "请先开通云开发" : "登录失败，请重试",
+        title: error.message === "CLOUD_UNAVAILABLE" ? "请配置正式 AppID" : "登录失败，请重试",
         icon: "none"
       });
     } finally {

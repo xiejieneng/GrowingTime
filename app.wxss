@@ -9,6 +9,10 @@ button {
   border-radius: 8rpx;
 }
 
+button::after {
+  border: 0;
+}
+
 .page {
   min-height: 100vh;
   box-sizing: border-box;
@@ -16,7 +20,7 @@ button {
 }
 
 .section {
-  margin-top: 28rpx;
+  margin-top: 40rpx;
 }
 
 .title {

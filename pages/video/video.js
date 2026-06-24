@@ -102,7 +102,7 @@ Page({
   },
 
   async preparePhotos(photos) {
-    if (!wx.cloud || !auth.isLoggedIn()) {
+    if (!auth.canUseCloud() || !auth.isLoggedIn()) {
       return photos.map((item) => ({
         ...item,
         path: item.compressedPath || item.path
@@ -138,7 +138,7 @@ Page({
   },
 
   callCreateVideo(payload) {
-    if (!wx.cloud || !auth.isLoggedIn()) {
+    if (!auth.canUseCloud() || !auth.isLoggedIn()) {
       return Promise.resolve({
         taskId: `local_${Date.now()}`,
         status: "queued",

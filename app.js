@@ -8,11 +8,13 @@ App({
   },
 
   onLaunch() {
-    if (wx.cloud) {
+    if (auth.canUseCloud()) {
       wx.cloud.init({
         traceUser: true
       });
       this.globalData.cloudReady = true;
+    } else {
+      this.globalData.cloudReady = false;
     }
 
     const session = auth.getSession();

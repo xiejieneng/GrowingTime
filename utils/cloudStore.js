@@ -3,7 +3,7 @@ const PHOTO_COLLECTION = "photos";
 const auth = require("./auth");
 
 function hasCloud() {
-  return Boolean(wx.cloud && auth.isLoggedIn());
+  return Boolean(auth.canUseCloud() && auth.isLoggedIn());
 }
 
 function getMonthKey(dateText) {

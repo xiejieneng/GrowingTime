@@ -1,103 +1,158 @@
 .home-page {
+  padding: 28rpx 36rpx 64rpx;
   padding-bottom: 48rpx;
 }
 
 .account-strip {
-  display: grid;
-  grid-template-columns: 72rpx 1fr auto;
+  display: flex;
   align-items: center;
-  gap: 18rpx;
-  padding: 18rpx 4rpx 24rpx;
+  min-height: 104rpx;
+  padding: 0 4rpx 28rpx;
 }
 
 .account-avatar {
-  width: 72rpx;
-  height: 72rpx;
+  flex: 0 0 76rpx;
+  width: 76rpx;
+  height: 76rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
   background: #2f6b55;
   border-radius: 50%;
-  font-weight: 700;
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.account-copy {
+  flex: 1;
+  min-width: 0;
+  margin-left: 20rpx;
 }
 
 .account-name {
-  font-weight: 700;
+  font-size: 28rpx;
+  font-weight: 800;
+  line-height: 1.25;
 }
 
 .account-hint {
-  margin-top: 4rpx;
+  margin-top: 6rpx;
   color: #758076;
-  font-size: 23rpx;
+  font-size: 24rpx;
+  line-height: 1.3;
 }
 
 .account-action {
+  flex: 0 0 auto;
+  margin-left: 16rpx;
   color: #2f6b55;
-  font-size: 25rpx;
-  font-weight: 600;
+  font-size: 26rpx;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .hero {
-  min-height: 360rpx;
+  box-sizing: border-box;
+  min-height: 440rpx;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 40rpx 32rpx;
-  border-radius: 8rpx;
+  padding: 48rpx 40rpx;
+  border-radius: 12rpx;
   color: #ffffff;
-  background:
-    linear-gradient(135deg, rgba(36, 95, 74, 0.96), rgba(116, 165, 109, 0.84) 56%, rgba(241, 182, 107, 0.9)),
-    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.14) 0, rgba(255, 255, 255, 0.14) 2rpx, transparent 2rpx, transparent 32rpx);
+  background: linear-gradient(135deg, #245f4a 0%, #70a56c 58%, #eeb36b 100%);
   position: relative;
   overflow: hidden;
 }
 
-.hero > view {
+.hero::after {
+  content: "";
+  position: absolute;
+  width: 260rpx;
+  height: 260rpx;
+  right: -72rpx;
+  bottom: -116rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  box-shadow: 0 0 0 34rpx rgba(255, 255, 255, 0.05);
+}
+
+.hero-copy,
+.hero-actions {
   position: relative;
   z-index: 1;
 }
 
 .hero .pill {
+  min-height: 48rpx;
+  padding: 0 20rpx;
   background: rgba(255, 255, 255, 0.18);
   color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 700;
 }
 
 .hero-title {
-  margin-top: 20rpx;
+  margin-top: 24rpx;
   color: #ffffff;
+  font-size: 56rpx;
+  line-height: 1.16;
+  font-weight: 800;
 }
 
-.hero .subtitle {
+.hero-subtitle {
+  margin-top: 14rpx;
   color: rgba(255, 255, 255, 0.88);
+  font-size: 28rpx;
+  line-height: 1.55;
 }
 
 .hero-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20rpx;
-  margin-top: 34rpx;
+  display: flex;
+  margin-top: 32rpx;
 }
 
 .action-btn {
+  flex: 1;
+  box-sizing: border-box;
   height: 88rpx;
   line-height: 88rpx;
+  padding: 0;
+  margin: 0;
+  border-radius: 10rpx;
+  font-size: 28rpx;
+}
+
+.action-btn + .action-btn {
+  margin-left: 20rpx;
+}
+
+.action-btn::after {
+  border: 0;
 }
 
 .stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16rpx;
+  display: flex;
+  margin-top: 40rpx;
 }
 
 .stat {
-  padding: 24rpx 16rpx;
+  flex: 1;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 30rpx 10rpx;
   text-align: center;
 }
 
+.stat + .stat {
+  margin-left: 16rpx;
+}
+
 .stat-value {
-  font-size: 40rpx;
-  font-weight: 700;
+  font-size: 48rpx;
+  line-height: 1.15;
+  font-weight: 800;
   color: #2f6b55;
 }
 
@@ -105,6 +160,7 @@
   margin-top: 8rpx;
   color: #758076;
   font-size: 24rpx;
+  line-height: 1.3;
 }
 
 .section-head {
@@ -114,21 +170,30 @@
 }
 
 .section-title {
-  font-size: 32rpx;
-  font-weight: 700;
+  font-size: 36rpx;
+  font-weight: 800;
+  line-height: 1.25;
 }
 
 .link {
   color: #2f6b55;
   font-size: 26rpx;
+  font-weight: 700;
 }
 
 .storage-card {
-  padding: 26rpx;
+  margin-top: 40rpx;
+  padding: 32rpx;
 }
 
 .storage-head {
   margin-top: 0;
+}
+
+.storage-title-wrap {
+  flex: 1;
+  min-width: 0;
+  padding-right: 16rpx;
 }
 
 .storage-desc {
@@ -139,9 +204,10 @@
 }
 
 .storage-badge {
-  min-width: 96rpx;
-  height: 52rpx;
-  line-height: 52rpx;
+  flex: 0 0 auto;
+  min-width: 116rpx;
+  height: 60rpx;
+  line-height: 60rpx;
   text-align: center;
   color: #2f6b55;
   background: #edf5ef;
@@ -150,19 +216,18 @@
 }
 
 .storage-bars {
-  margin-top: 22rpx;
+  margin-top: 24rpx;
 }
 
 .bar-row {
-  display: grid;
-  grid-template-columns: 112rpx 1fr 112rpx;
+  display: flex;
   align-items: center;
-  gap: 14rpx;
-  margin-top: 16rpx;
+  margin-top: 20rpx;
 }
 
 .bar-label,
 .bar-size {
+  flex: 0 0 116rpx;
   color: #758076;
   font-size: 24rpx;
 }
@@ -172,7 +237,9 @@
 }
 
 .bar-track {
+  flex: 1;
   height: 16rpx;
+  margin: 0 16rpx;
   overflow: hidden;
   background: #edf1ec;
   border-radius: 999rpx;
@@ -193,30 +260,33 @@
 }
 
 .saving-text {
-  margin-top: 18rpx;
+  margin-top: 24rpx;
   color: #8a5a12;
   background: #fff8ec;
   border: 1rpx solid #f4dfbd;
   border-radius: 8rpx;
-  padding: 16rpx;
+  padding: 20rpx;
   font-size: 24rpx;
   line-height: 1.4;
 }
 
 .recent-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18rpx;
-  margin-top: 18rpx;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-top: 20rpx;
 }
 
 .photo-card {
+  box-sizing: border-box;
+  width: calc(50% - 10rpx);
+  margin-bottom: 20rpx;
   overflow: hidden;
 }
 
 .photo-card image {
   width: 100%;
-  height: 220rpx;
+  height: 264rpx;
   display: block;
 }
 
@@ -235,8 +305,8 @@
 }
 
 .empty {
-  margin-top: 18rpx;
-  padding: 40rpx 32rpx;
+  margin-top: 20rpx;
+  padding: 48rpx 36rpx;
 }
 
 .empty-title {

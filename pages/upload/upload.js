@@ -225,8 +225,8 @@ Page({
     if (!auth.isLoggedIn()) {
       return "游客模式：仅保存在当前设备";
     }
-    if (!wx.cloud) {
-      return "本地模式：未开启云开发";
+    if (!auth.canUseCloud()) {
+      return "本地模式：请配置正式 AppID 后开启云开发";
     }
     if (meta.originalUploadSkipped) {
       return `已上传展示图；当前网络 ${meta.networkType}，原图等待 Wi‑Fi`;
