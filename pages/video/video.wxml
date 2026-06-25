@@ -96,18 +96,45 @@
         enable-play-gesture
         binderror="onPlayerError"
       ></video>
-      <swiper
+      <view
         wx:else
         class="preview-player"
-        autoplay
-        circular
-        interval="{{activeVideo.previewInterval}}"
-        duration="600"
       >
-        <swiper-item wx:for="{{activeVideo.previewPhotos}}" wx:key="*this">
-          <image class="preview-image" src="{{item}}" mode="aspectFit"></image>
-        </swiper-item>
-      </swiper>
+        <image
+          wx:if="{{activeVideo.previewCycle === 'a'}}"
+          class="preview-image motion-{{activeVideo.previewMotion}}"
+          style="animation-duration: {{activeVideo.previewAnimationDuration}}ms;"
+          src="{{activeVideo.previewCurrent}}"
+          mode="aspectFill"
+          fade-in="{{false}}"
+        ></image>
+        <image
+          wx:else
+          class="preview-image motion-{{activeVideo.previewMotion}}"
+          style="animation-duration: {{activeVideo.previewAnimationDuration}}ms;"
+          src="{{activeVideo.previewCurrent}}"
+          mode="aspectFill"
+          fade-in="{{false}}"
+        ></image>
+        <view class="preview-shade"></view>
+        <view class="preview-caption">
+          <view class="preview-theme">{{activeVideo.theme}}</view>
+          <view class="preview-style">{{activeVideo.style}}</view>
+        </view>
+        <view class="preview-counter">{{activeVideo.previewIndex + 1}} / {{activeVideo.previewPhotos.length}}</view>
+        <view class="preview-progress">
+          <view
+            wx:if="{{activeVideo.previewCycle === 'a'}}"
+            class="preview-progress-fill"
+            style="animation-duration: {{activeVideo.previewInterval}}ms;"
+          ></view>
+          <view
+            wx:else
+            class="preview-progress-fill"
+            style="animation-duration: {{activeVideo.previewInterval}}ms;"
+          ></view>
+        </view>
+      </view>
       <view wx:if="{{activeVideo.previewOnly}}" class="preview-badge">成长片段预览</view>
       <view wx:if="{{playerError}}" class="player-error">{{playerError}}</view>
       <view class="player-meta">{{activeVideo.style}} · {{activeVideo.duration}}秒 · {{activeVideo.photoCount}}张照片</view>

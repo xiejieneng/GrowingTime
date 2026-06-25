@@ -24,6 +24,14 @@ Page({
     playerError: ""
   },
 
+  onHide() {
+    this.stopPreviewTimer();
+  },
+
+  onUnload() {
+    this.stopPreviewTimer();
+  },
+
   onShow() {
     const storedPhotos = storage.getPhotos();
     const photos = storedPhotos.map((item, index) => ({
@@ -36,6 +44,10 @@ Page({
       photos,
       videos,
       selectedCount: photos.filter((item) => item.selected).length
+    }, () => {
+      if (this.data.activeVideo && this.data.activeVideo.previewOnly) {
+        this.startPreviewTimer();
+      }
     });
   },
 
@@ -294,13 +306,20 @@ Page({
           src,
           cover,
           previewOnly: !src,
-          previewInterval: interval
+          previewInterval: interval,
+          previewAnimationDuration: interval + 500,
+          previewIndex: 0,
+          previewCurrent: (video.previewPhotos || [])[0] || "",
+          previewMotion: "zoom-in",
+          previewCycle: "a"
         },
         playerError: ""
       }, () => {
         if (src) {
           const context = wx.createVideoContext("growthVideo", this);
           context.play();
+        } else {
+          this.startPreviewTimer();
         }
       });
     } catch (error) {
@@ -312,6 +331,7 @@ Page({
   },
 
   closePlayer() {
+    this.stopPreviewTimer();
     if (this.data.activeVideo && !this.data.activeVideo.previewOnly) {
       const context = wx.createVideoContext("growthVideo", this);
       context.stop();
@@ -320,6 +340,42 @@ Page({
       activeVideo: null,
       playerError: ""
     });
+  },
+
+  startPreviewTimer() {
+    this.stopPreviewTimer();
+    const activeVideo = this.data.activeVideo;
+    if (!activeVideo || !activeVideo.previewOnly || !activeVideo.previewPhotos.length) {
+      return;
+    }
+    this.previewTimer = setTimeout(() => {
+      this.advancePreview();
+    }, activeVideo.previewInterval);
+  },
+
+  stopPreviewTimer() {
+    if (this.previewTimer) {
+      clearTimeout(this.previewTimer);
+      this.previewTimer = null;
+    }
+  },
+
+  advancePreview() {
+    const activeVideo = this.data.activeVideo;
+    if (!activeVideo || !activeVideo.previewOnly || !activeVideo.previewPhotos.length) {
+      return;
+    }
+    const motions = ["zoom-in", "pan-left", "pull-back", "pan-right"];
+    const nextIndex = (activeVideo.previewIndex + 1) % activeVideo.previewPhotos.length;
+    this.setData({
+      activeVideo: {
+        ...activeVideo,
+        previewIndex: nextIndex,
+        previewCurrent: activeVideo.previewPhotos[nextIndex],
+        previewMotion: motions[nextIndex % motions.length],
+        previewCycle: activeVideo.previewCycle === "a" ? "b" : "a"
+      }
+    }, () => this.startPreviewTimer());
   },
 
   onPlayerError() {
