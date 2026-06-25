@@ -1,7 +1,7 @@
 const storage = require("../../utils/storage");
 const cloudStore = require("../../utils/cloudStore");
 const auth = require("../../utils/auth");
-const { formatDate, monthKey } = require("../../utils/date");
+const { formatDate, monthKey, photoTakenAt } = require("../../utils/date");
 
 function placeText(photo) {
   if (photo.placeName) {
@@ -29,14 +29,15 @@ Page({
   refreshGroups(photos = storage.getPhotos()) {
     const selected = new Set(this.data.selectedPhotoIds);
     const grouped = photos.reduce((acc, photo) => {
-      const month = monthKey(photo.takenAt || photo.createdAt);
+      const actualTakenAt = photoTakenAt(photo);
+      const month = monthKey(actualTakenAt);
       if (!acc[month]) {
         acc[month] = [];
       }
       acc[month].push({
         ...photo,
         selected: selected.has(photo.id),
-        displayDate: formatDate(photo.takenAt || photo.createdAt) || "未知日期",
+        displayDate: formatDate(actualTakenAt) || "未知日期",
         placeText: placeText(photo)
       });
       return acc;

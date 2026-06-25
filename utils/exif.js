@@ -2,9 +2,13 @@ const { parseExifDate } = require("./date");
 
 const TAGS = {
   0x0132: "modifiedAt",
-  0x9003: "takenAt",
-  0x9004: "digitizedAt",
+  0x8769: "exifInfo",
   0x8825: "gpsInfo"
+};
+
+const EXIF_TAGS = {
+  0x9003: "takenAt",
+  0x9004: "digitizedAt"
 };
 
 const GPS_TAGS = {
@@ -111,8 +115,9 @@ function parseExif(buffer) {
       const littleEndian = byteOrder === "II";
       const firstIfdOffset = view.getUint32(tiffStart + 4, littleEndian);
       const ifd = parseDirectory(view, tiffStart, firstIfdOffset, littleEndian, TAGS);
+      const exif = parseDirectory(view, tiffStart, ifd.exifInfo, littleEndian, EXIF_TAGS);
       const gps = parseDirectory(view, tiffStart, ifd.gpsInfo, littleEndian, GPS_TAGS);
-      const takenDate = parseExifDate(ifd.takenAt || ifd.digitizedAt || ifd.modifiedAt);
+      const takenDate = parseExifDate(exif.takenAt || exif.digitizedAt || ifd.modifiedAt);
       const latitude = toCoordinate(gps.lat, gps.latRef);
       const longitude = toCoordinate(gps.lng, gps.lngRef);
 

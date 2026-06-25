@@ -1,5 +1,5 @@
 .video-page {
-  padding-bottom: 180rpx;
+  padding-bottom: 300rpx;
 }
 
 .form-panel {
@@ -193,7 +193,7 @@ input,
   z-index: 20;
   left: 24rpx;
   right: 24rpx;
-  bottom: calc(24rpx + env(safe-area-inset-bottom));
+  bottom: calc(116rpx + env(safe-area-inset-bottom));
   height: 104rpx;
   display: flex;
   align-items: center;

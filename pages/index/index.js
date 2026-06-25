@@ -1,7 +1,7 @@
 const storage = require("../../utils/storage");
 const cloudStore = require("../../utils/cloudStore");
 const auth = require("../../utils/auth");
-const { formatDate, monthKey } = require("../../utils/date");
+const { formatDate, monthKey, photoTakenAt } = require("../../utils/date");
 
 function formatBytes(size) {
   if (!size) {
@@ -36,7 +36,7 @@ Page({
     const app = getApp();
     const photos = storage.getPhotos();
     const videos = storage.getVideos();
-    const albums = new Set(photos.map((item) => monthKey(item.takenAt || item.createdAt)));
+    const albums = new Set(photos.map((item) => photoTakenAt(item)).filter(Boolean).map(monthKey));
     const stats = storage.getStorageStats();
     const settings = cloudStore.getStorageSettings();
     const session = auth.getSession();
@@ -62,7 +62,7 @@ Page({
       originalPercent: Math.max(Math.round(stats.originalBytes / maxBytes * 100), photos.length ? 6 : 0),
       recentPhotos: photos.slice(0, 4).map((item) => ({
         ...item,
-        displayDate: formatDate(item.takenAt || item.createdAt) || "未知日期",
+        displayDate: formatDate(photoTakenAt(item)) || "未知日期",
         placeText: item.placeName || (item.hasGps ? "已记录位置" : "未记录位置")
       }))
     });

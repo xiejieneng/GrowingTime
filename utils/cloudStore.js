@@ -72,7 +72,7 @@ async function uploadPhotoAssets(photo, localPaths, settings) {
     };
   }
   const currentSettings = settings || getStorageSettings();
-  const month = getMonthKey(photo.takenAt || photo.createdAt);
+  const month = getMonthKey(photo.takenAt);
   const userId = session.user.id;
   const babyId = session.user.babyId || currentSettings.babyId;
   const basePath = `users/${userId}/babies/${babyId}/photos/${month}`;

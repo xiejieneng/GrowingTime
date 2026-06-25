@@ -147,7 +147,8 @@ Page({
           path: file.tempFilePath,
           compressedPath: compressed.path,
           createdAt: new Date().toISOString(),
-          takenAt: meta.takenAt || new Date().toISOString(),
+          takenAt: meta.takenAt || "",
+          dateSource: meta.takenAt ? "exif" : "unknown",
           latitude: meta.latitude,
           longitude: meta.longitude,
           hasGps: meta.hasGps || false,
@@ -157,13 +158,16 @@ Page({
           compressedSize: compressed.compressedSize,
           displaySize: compressed.compressedSize,
           quality: compressed.quality,
+          reusedOriginal: compressed.reusedOriginal,
           storageMode: this.data.uploadOriginal ? "backup" : "saving"
         };
 
         const loggedIn = auth.isLoggedIn();
         this.updateQueue(id, {
           statusText: loggedIn ? "上传云存储中" : "保存到本地",
-          sizeText: `${formatPixels(photo.width, photo.height)} · ${formatSize(photo.originalSize)} -> ${formatSize(photo.compressedSize)}`
+          sizeText: compressed.reusedOriginal
+            ? `${formatPixels(photo.width, photo.height)} · 原图已是更优体积，直接保留`
+            : `${formatPixels(photo.width, photo.height)} · ${formatSize(photo.originalSize)} -> ${formatSize(photo.compressedSize)}`
         });
 
         let cloudMeta = {};
@@ -200,7 +204,9 @@ Page({
           statusText: "已整理",
           displayDate: formatDate(cloudPhoto.takenAt),
           placeText: placeText(cloudPhoto),
-          sizeText: `${formatPixels(cloudPhoto.width, cloudPhoto.height)} · 质量 ${cloudPhoto.quality}% · 节省 ${Math.max(compressed.ratio, 0)}%`,
+          sizeText: compressed.reusedOriginal
+            ? `${formatPixels(cloudPhoto.width, cloudPhoto.height)} · 已保留原图，未增加体积`
+            : `${formatPixels(cloudPhoto.width, cloudPhoto.height)} · 质量 ${cloudPhoto.quality}% · 节省 ${Math.max(compressed.ratio, 0)}%`,
           cloudText
         });
       } catch (error) {

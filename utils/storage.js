@@ -60,7 +60,10 @@ function removePhoto(id) {
 function getStorageStats() {
   const photos = getPhotos();
   const videos = getVideos();
-  const displayBytes = photos.reduce((sum, item) => sum + (item.compressedSize || item.displaySize || 0), 0);
+  const displayBytes = photos.reduce((sum, item) => {
+    const displaySize = item.compressedSize || item.displaySize || 0;
+    return sum + (item.originalSize ? Math.min(displaySize, item.originalSize) : displaySize);
+  }, 0);
   const originalBytes = photos.reduce((sum, item) => sum + (item.originalSize || 0), 0);
   const cloudPhotos = photos.filter((item) => item.displayFileId || item.originalFileId).length;
 

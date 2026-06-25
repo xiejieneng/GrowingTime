@@ -38,6 +38,19 @@ function saveTempFile(tempFilePath) {
   });
 }
 
+function removeSavedFile(filePath) {
+  return new Promise((resolve) => {
+    if (!filePath || !filePath.startsWith("wxfile://")) {
+      resolve();
+      return;
+    }
+    wx.removeSavedFile({
+      filePath,
+      complete: resolve
+    });
+  });
+}
+
 function calcTargetSize(width, height, maxSide) {
   const longSide = Math.max(width, height);
   if (longSide <= maxSide) {
@@ -94,6 +107,23 @@ async function compressPhoto(page, filePath, options = {}) {
 
   const originalInfo = await getFileInfo(filePath);
   const compressedInfo = await getFileInfo(savedPath);
+  const compressedIsSmaller = compressedInfo.size > 0
+    && (!originalInfo.size || compressedInfo.size < originalInfo.size);
+
+  if (!compressedIsSmaller && originalInfo.size) {
+    await removeSavedFile(savedPath);
+    const originalPath = await saveTempFile(filePath);
+    return {
+      path: originalPath,
+      width: info.width,
+      height: info.height,
+      originalSize: originalInfo.size,
+      compressedSize: originalInfo.size,
+      quality: 100,
+      ratio: 0,
+      reusedOriginal: true
+    };
+  }
 
   return {
     path: savedPath,
@@ -102,7 +132,8 @@ async function compressPhoto(page, filePath, options = {}) {
     originalSize: originalInfo.size,
     compressedSize: compressedInfo.size,
     quality: qualityPercent,
-    ratio: originalInfo.size ? Math.round((1 - compressedInfo.size / originalInfo.size) * 100) : 0
+    ratio: originalInfo.size ? Math.round((1 - compressedInfo.size / originalInfo.size) * 100) : 0,
+    reusedOriginal: false
   };
 }
 
