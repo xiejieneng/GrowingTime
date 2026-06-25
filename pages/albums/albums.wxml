@@ -1,5 +1,8 @@
 <view class="page albums-page">
-  <view class="title">成长相册</view>
+  <view class="page-title-row">
+    <view class="title">成长相册</view>
+    <view wx:if="{{groups.length}}" class="manage-link" bindtap="toggleManage">{{managing ? "取消" : "管理"}}</view>
+  </view>
   <view class="subtitle">照片会按拍摄月份自动整理；带 GPS 信息的照片会显示拍摄坐标，后续可接入地图逆地理编码显示城市与地点名。</view>
 
   <view wx:if="{{groups.length}}" class="section">
@@ -12,16 +15,9 @@
       </view>
 
       <view class="photo-grid">
-        <view wx:for="{{item.photos}}" wx:key="id" wx:for-item="photo" class="album-card panel" bindtap="previewPhoto" data-src="{{photo.compressedPath || photo.path}}">
+        <view wx:for="{{item.photos}}" wx:key="id" wx:for-item="photo" class="album-card panel {{photo.selected ? 'selected' : ''}}" bindtap="previewPhoto" data-id="{{photo.id}}" data-src="{{photo.compressedPath || photo.path}}">
           <image src="{{photo.compressedPath || photo.path}}" mode="aspectFill" fade-in="{{false}}" show-menu-by-longpress="{{true}}"></image>
-          <button
-            class="photo-delete"
-            hover-class="photo-delete-pressed"
-            loading="{{deletingPhotoId === photo.id}}"
-            disabled="{{deletingPhotoId !== ''}}"
-            data-id="{{photo.id}}"
-            catchtap="deletePhoto"
-          >删除</button>
+          <view wx:if="{{managing}}" class="select-indicator {{photo.selected ? 'checked' : ''}}">{{photo.selected ? "✓" : ""}}</view>
           <view class="album-meta">
             <view class="album-date">{{photo.displayDate}}</view>
             <view class="album-place">{{photo.placeText}}</view>
@@ -35,5 +31,11 @@
     <view class="empty-title">相册还是空的</view>
     <view class="empty-text">去“整理”页选择原图，系统会自动按拍摄时间生成成长月份。</view>
     <button class="primary-btn empty-btn" hover-class="button-pressed" bindtap="goUpload">开始整理</button>
+  </view>
+
+  <view wx:if="{{managing}}" class="batch-bar">
+    <view class="batch-select" bindtap="selectAll">{{selectedPhotoIds.length === photoCount ? "取消全选" : "全选"}}</view>
+    <view class="batch-count">已选 {{selectedPhotoIds.length}} 张</view>
+    <button class="batch-delete" disabled="{{!selectedPhotoIds.length || deleting}}" loading="{{deleting}}" bindtap="deleteSelectedPhotos">删除</button>
   </view>
 </view>

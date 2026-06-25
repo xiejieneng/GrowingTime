@@ -49,10 +49,14 @@
   <view wx:if="{{videos.length}}" class="section">
     <view class="section-head">
       <view class="section-title">生成记录</view>
-      <view class="link refresh-link" bindtap="refreshTasks">{{refreshing ? "刷新中" : "刷新状态"}}</view>
+      <view class="record-actions">
+        <view wx:if="{{!managingVideos}}" class="link refresh-link" bindtap="refreshTasks">{{refreshing ? "刷新中" : "刷新状态"}}</view>
+        <view class="link" bindtap="toggleVideoManage">{{managingVideos ? "取消" : "管理"}}</view>
+      </view>
     </view>
     <view class="task-list">
-      <view wx:for="{{videos}}" wx:key="id" class="task panel">
+      <view wx:for="{{videos}}" wx:key="id" class="task panel {{item.selected ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="toggleVideoSelection">
+        <view wx:if="{{managingVideos}}" class="record-check {{item.selected ? 'checked' : ''}}">{{item.selected ? "✓" : ""}}</view>
         <view class="task-main">
           <view class="task-title">{{item.theme}}</view>
           <view class="task-meta">{{item.style}} · {{item.duration}}秒 · {{item.photoCount}}张</view>
@@ -60,18 +64,16 @@
         </view>
         <view class="task-side">
           <view class="task-status {{item.failed ? 'failed' : ''}}">{{item.statusText}}</view>
-          <button wx:if="{{item.playable}}" class="task-play" hover-class="button-pressed" data-id="{{item.id}}" bindtap="playVideo">在线播放</button>
-          <button
-            class="task-delete"
-            hover-class="button-pressed"
-            loading="{{deletingVideoId === item.id}}"
-            disabled="{{deletingVideoId !== ''}}"
-            data-id="{{item.id}}"
-            bindtap="deleteVideo"
-          >删除</button>
+          <button wx:if="{{item.playable && !managingVideos}}" class="task-play" hover-class="button-pressed" data-id="{{item.id}}" catchtap="playVideo">{{item.previewOnly ? "播放预览" : "在线播放"}}</button>
         </view>
       </view>
     </view>
+  </view>
+
+  <view wx:if="{{managingVideos}}" class="batch-bar">
+    <view class="batch-select" bindtap="selectAllVideos">{{selectedVideoIds.length === videos.length ? "取消全选" : "全选"}}</view>
+    <view class="batch-count">已选 {{selectedVideoIds.length}} 条</view>
+    <button class="batch-delete" disabled="{{!selectedVideoIds.length || deletingVideos}}" loading="{{deletingVideos}}" bindtap="deleteSelectedVideos">删除</button>
   </view>
 
   <view wx:if="{{activeVideo}}" class="player-mask">
@@ -81,6 +83,7 @@
         <view class="player-close" bindtap="closePlayer">关闭</view>
       </view>
       <video
+        wx:if="{{!activeVideo.previewOnly}}"
         id="growthVideo"
         class="online-player"
         src="{{activeVideo.src}}"
@@ -93,6 +96,19 @@
         enable-play-gesture
         binderror="onPlayerError"
       ></video>
+      <swiper
+        wx:else
+        class="preview-player"
+        autoplay
+        circular
+        interval="{{activeVideo.previewInterval}}"
+        duration="600"
+      >
+        <swiper-item wx:for="{{activeVideo.previewPhotos}}" wx:key="*this">
+          <image class="preview-image" src="{{item}}" mode="aspectFit"></image>
+        </swiper-item>
+      </swiper>
+      <view wx:if="{{activeVideo.previewOnly}}" class="preview-badge">成长片段预览</view>
       <view wx:if="{{playerError}}" class="player-error">{{playerError}}</view>
       <view class="player-meta">{{activeVideo.style}} · {{activeVideo.duration}}秒 · {{activeVideo.photoCount}}张照片</view>
     </view>

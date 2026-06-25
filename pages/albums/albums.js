@@ -16,7 +16,10 @@ function placeText(photo) {
 Page({
   data: {
     groups: [],
-    deletingPhotoId: ""
+    photoCount: 0,
+    managing: false,
+    selectedPhotoIds: [],
+    deleting: false
   },
 
   onShow() {
@@ -24,6 +27,7 @@ Page({
   },
 
   refreshGroups(photos = storage.getPhotos()) {
+    const selected = new Set(this.data.selectedPhotoIds);
     const grouped = photos.reduce((acc, photo) => {
       const month = monthKey(photo.takenAt || photo.createdAt);
       if (!acc[month]) {
@@ -31,6 +35,7 @@ Page({
       }
       acc[month].push({
         ...photo,
+        selected: selected.has(photo.id),
         displayDate: formatDate(photo.takenAt || photo.createdAt) || "未知日期",
         placeText: placeText(photo)
       });
@@ -42,10 +47,14 @@ Page({
       photos: grouped[month]
     }));
 
-    this.setData({ groups });
+    this.setData({ groups, photoCount: photos.length });
   },
 
   previewPhoto(event) {
+    if (this.data.managing) {
+      this.togglePhotoSelection(event);
+      return;
+    }
     const current = event.currentTarget.dataset.src;
     const urls = this.data.groups.flatMap((group) => group.photos.map((photo) => photo.compressedPath || photo.path));
     wx.previewImage({
@@ -54,13 +63,43 @@ Page({
     });
   },
 
-  confirmDelete(hasCloudFiles) {
+  toggleManage() {
+    const managing = !this.data.managing;
+    this.setData({
+      managing,
+      selectedPhotoIds: []
+    }, () => this.refreshGroups());
+  },
+
+  togglePhotoSelection(event) {
+    const id = event.currentTarget.dataset.id;
+    if (!id || this.data.deleting) {
+      return;
+    }
+    const selected = new Set(this.data.selectedPhotoIds);
+    if (selected.has(id)) {
+      selected.delete(id);
+    } else {
+      selected.add(id);
+    }
+    this.setData({
+      selectedPhotoIds: Array.from(selected)
+    }, () => this.refreshGroups());
+  },
+
+  selectAll() {
+    const allIds = storage.getPhotos().map((photo) => photo.id);
+    const selectedPhotoIds = this.data.selectedPhotoIds.length === allIds.length ? [] : allIds;
+    this.setData({ selectedPhotoIds }, () => this.refreshGroups());
+  },
+
+  confirmDelete(hasCloudFiles, count) {
     return new Promise((resolve) => {
       wx.showModal({
         title: "删除照片",
         content: hasCloudFiles
-          ? "将删除本地照片记录，并清理云端展示图、原图和照片索引。此操作不可恢复。"
-          : "将删除这张照片及本地整理记录。此操作不可恢复。",
+          ? `将删除选中的 ${count} 张照片，并清理云端图片和索引。此操作不可恢复。`
+          : `将删除选中的 ${count} 张照片及本地记录。此操作不可恢复。`,
         confirmText: "删除",
         confirmColor: "#B34136",
         success: (res) => resolve(Boolean(res.confirm)),
@@ -107,34 +146,38 @@ Page({
     return success;
   },
 
-  async deletePhoto(event) {
-    const id = event.currentTarget.dataset.id;
-    if (!id || this.data.deletingPhotoId) {
+  async deleteSelectedPhotos() {
+    const ids = this.data.selectedPhotoIds;
+    if (!ids.length || this.data.deleting) {
       return;
     }
-    const photo = storage.getPhotos().find((item) => item.id === id);
-    if (!photo) {
-      return;
-    }
-    const hasCloudFiles = [photo.displayFileId, photo.originalFileId].some((fileID) => {
-      return fileID && fileID.startsWith("cloud://");
+    const photos = storage.getPhotos().filter((photo) => ids.includes(photo.id));
+    const hasCloudFiles = photos.some((photo) => {
+      return [photo.displayFileId, photo.originalFileId].some((fileID) => fileID && fileID.startsWith("cloud://"));
     });
-    const confirmed = await this.confirmDelete(hasCloudFiles);
+    const confirmed = await this.confirmDelete(hasCloudFiles, photos.length);
     if (!confirmed) {
       return;
     }
 
-    this.setData({ deletingPhotoId: id });
-    const cloudDeleted = await this.deleteCloudPhoto(photo);
-    await Promise.all([
-      this.removeSavedFile(photo.compressedPath),
-      photo.path !== photo.compressedPath ? this.removeSavedFile(photo.path) : Promise.resolve()
-    ]);
-    const photos = storage.removePhoto(id);
-    this.refreshGroups(photos);
-    this.setData({ deletingPhotoId: "" });
+    this.setData({ deleting: true });
+    let cloudDeleted = true;
+    for (const photo of photos) {
+      const deleted = await this.deleteCloudPhoto(photo);
+      cloudDeleted = cloudDeleted && deleted;
+      await Promise.all([
+        this.removeSavedFile(photo.compressedPath),
+        photo.path !== photo.compressedPath ? this.removeSavedFile(photo.path) : Promise.resolve()
+      ]);
+      storage.removePhoto(photo.id);
+    }
+    this.setData({
+      deleting: false,
+      managing: false,
+      selectedPhotoIds: []
+    }, () => this.refreshGroups());
     wx.showToast({
-      title: cloudDeleted ? "照片已删除" : "本地已删，云端待清理",
+      title: cloudDeleted ? `已删除${photos.length}张` : "本地已删，云端待清理",
       icon: cloudDeleted ? "success" : "none"
     });
   },

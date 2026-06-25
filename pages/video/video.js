@@ -17,17 +17,21 @@ Page({
     videos: [],
     creating: false,
     refreshing: false,
-    deletingVideoId: "",
+    managingVideos: false,
+    selectedVideoIds: [],
+    deletingVideos: false,
     activeVideo: null,
     playerError: ""
   },
 
   onShow() {
-    const photos = storage.getPhotos().map((item, index) => ({
+    const storedPhotos = storage.getPhotos();
+    const photos = storedPhotos.map((item, index) => ({
       ...item,
       selected: index < 6
     }));
-    const videos = this.decorateVideos(storage.getVideos());
+    const migratedVideos = this.migratePreviewRecords(storage.getVideos(), storedPhotos);
+    const videos = this.decorateVideos(migratedVideos);
     this.setData({
       photos,
       videos,
@@ -35,13 +39,80 @@ Page({
     });
   },
 
+  migratePreviewRecords(videos, photos) {
+    let changed = false;
+    const next = videos.map((video) => {
+      const isMockTask = /^(mock|local)_/.test(video.taskId || "");
+      if (!isMockTask || video.videoFileId || video.videoUrl || (video.previewPhotos && video.previewPhotos.length)) {
+        return video;
+      }
+      const previewPhotos = photos
+        .slice(0, video.photoCount || 6)
+        .map((photo) => photo.compressedPath || photo.path)
+        .filter(Boolean);
+      if (!previewPhotos.length) {
+        return video;
+      }
+      changed = true;
+      return {
+        ...video,
+        status: "completed",
+        statusText: "预览可播放",
+        previewPhotos
+      };
+    });
+    if (changed) {
+      storage.saveVideos(next);
+    }
+    return next;
+  },
+
   decorateVideos(videos) {
+    const selected = new Set(this.data.selectedVideoIds);
     return videos.map((video) => ({
       ...video,
-      playable: Boolean(video.videoFileId || video.videoUrl),
+      selected: selected.has(video.id),
+      playable: Boolean(video.videoFileId || video.videoUrl || (video.previewPhotos && video.previewPhotos.length)),
+      previewOnly: !video.videoFileId && !video.videoUrl && Boolean(video.previewPhotos && video.previewPhotos.length),
       completed: video.status === "completed" || video.status === "success",
       failed: video.status === "failed"
     }));
+  },
+
+  toggleVideoManage() {
+    const managingVideos = !this.data.managingVideos;
+    this.setData({
+      managingVideos,
+      selectedVideoIds: []
+    }, () => {
+      this.setData({ videos: this.decorateVideos(storage.getVideos()) });
+    });
+  },
+
+  toggleVideoSelection(event) {
+    if (!this.data.managingVideos || this.data.deletingVideos) {
+      return;
+    }
+    const id = event.currentTarget.dataset.id;
+    const selected = new Set(this.data.selectedVideoIds);
+    if (selected.has(id)) {
+      selected.delete(id);
+    } else {
+      selected.add(id);
+    }
+    this.setData({
+      selectedVideoIds: Array.from(selected)
+    }, () => {
+      this.setData({ videos: this.decorateVideos(storage.getVideos()) });
+    });
+  },
+
+  selectAllVideos() {
+    const ids = storage.getVideos().map((video) => video.id);
+    const selectedVideoIds = this.data.selectedVideoIds.length === ids.length ? [] : ids;
+    this.setData({ selectedVideoIds }, () => {
+      this.setData({ videos: this.decorateVideos(storage.getVideos()) });
+    });
   },
 
   onThemeInput(event) {
@@ -90,15 +161,18 @@ Page({
         }))
       };
       const result = await this.callCreateVideo(payload);
+      const hasVideoSource = Boolean(result.videoFileId || result.fileID || result.videoUrl);
+      const isMockTask = !hasVideoSource && /^(mock|local)_/.test(result.taskId || "");
       const video = {
         id: createId(),
         taskId: result.taskId,
-        status: result.status || "queued",
-        statusText: result.statusText || "排队中",
+        status: isMockTask ? "completed" : (result.status || "queued"),
+        statusText: isMockTask ? "预览可播放" : (result.statusText || "排队中"),
         theme: payload.theme,
         style: payload.style,
         duration: payload.duration,
         photoCount: selected.length,
+        previewPhotos: selected.map((item) => item.compressedPath || item.path).filter(Boolean),
         videoFileId: result.videoFileId || result.fileID || "",
         videoUrl: result.videoUrl || "",
         coverFileId: result.coverFileId || "",
@@ -193,27 +267,41 @@ Page({
   },
 
   async playVideo(event) {
+    if (this.data.managingVideos) {
+      this.toggleVideoSelection(event);
+      return;
+    }
     const id = event.currentTarget.dataset.id;
     const video = storage.getVideos().find((item) => item.id === id);
-    if (!video || (!video.videoFileId && !video.videoUrl)) {
+    const hasPreview = Boolean(video && video.previewPhotos && video.previewPhotos.length);
+    if (!video || (!video.videoFileId && !video.videoUrl && !hasPreview)) {
       wx.showToast({ title: "视频尚未生成完成", icon: "none" });
       return;
     }
 
     wx.showLoading({ title: "加载视频" });
     try {
-      const src = await this.resolveCloudUrl(video.videoFileId || video.videoUrl);
-      const cover = await this.resolveCloudUrl(video.coverFileId || video.coverUrl);
+      const src = video.videoFileId || video.videoUrl
+        ? await this.resolveCloudUrl(video.videoFileId || video.videoUrl)
+        : "";
+      const cover = video.coverFileId || video.coverUrl
+        ? await this.resolveCloudUrl(video.coverFileId || video.coverUrl)
+        : "";
+      const interval = Math.max(Math.round((video.duration || 15) * 1000 / Math.max((video.previewPhotos || []).length, 1)), 1200);
       this.setData({
         activeVideo: {
           ...video,
           src,
-          cover
+          cover,
+          previewOnly: !src,
+          previewInterval: interval
         },
         playerError: ""
       }, () => {
-        const context = wx.createVideoContext("growthVideo", this);
-        context.play();
+        if (src) {
+          const context = wx.createVideoContext("growthVideo", this);
+          context.play();
+        }
       });
     } catch (error) {
       console.warn("resolve video url failed", error);
@@ -224,8 +312,10 @@ Page({
   },
 
   closePlayer() {
-    const context = wx.createVideoContext("growthVideo", this);
-    context.stop();
+    if (this.data.activeVideo && !this.data.activeVideo.previewOnly) {
+      const context = wx.createVideoContext("growthVideo", this);
+      context.stop();
+    }
     this.setData({
       activeVideo: null,
       playerError: ""
@@ -306,11 +396,11 @@ Page({
     });
   },
 
-  async deleteCloudVideoFiles(video) {
+  async deleteCloudVideoFiles(videos) {
     if (!auth.canUseCloud() || !auth.isLoggedIn()) {
       return true;
     }
-    const fileList = [video.videoFileId, video.coverFileId].filter((fileID, index, list) => {
+    const fileList = videos.flatMap((video) => [video.videoFileId, video.coverFileId]).filter((fileID, index, list) => {
       return fileID && fileID.startsWith("cloud://") && list.indexOf(fileID) === index;
     });
     if (!fileList.length) {
@@ -325,39 +415,39 @@ Page({
     }
   },
 
-  async deleteVideo(event) {
-    const id = event.currentTarget.dataset.id;
-    if (!id || this.data.deletingVideoId) {
+  async deleteSelectedVideos() {
+    const ids = this.data.selectedVideoIds;
+    if (!ids.length || this.data.deletingVideos) {
       return;
     }
-    const video = storage.getVideos().find((item) => item.id === id);
-    if (!video) {
-      return;
-    }
-    const hasCloudFiles = [video.videoFileId, video.coverFileId].some((fileID) => {
-      return fileID && fileID.startsWith("cloud://");
+    const videos = storage.getVideos().filter((video) => ids.includes(video.id));
+    const hasCloudFiles = videos.some((video) => {
+      return [video.videoFileId, video.coverFileId].some((fileID) => fileID && fileID.startsWith("cloud://"));
     });
     const confirmed = await this.confirmDelete(
       hasCloudFiles
-        ? "将删除这条生成记录，并清理云端成品视频和封面。此操作不可恢复。"
-        : "将删除这条生成记录。外部视频地址及第三方任务不会被删除。"
+        ? `将删除选中的 ${videos.length} 条记录，并清理云端视频和封面。此操作不可恢复。`
+        : `将删除选中的 ${videos.length} 条记录。外部视频及第三方任务不会被删除。`
     );
     if (!confirmed) {
       return;
     }
 
-    this.setData({ deletingVideoId: id });
-    if (this.data.activeVideo && this.data.activeVideo.id === id) {
+    this.setData({ deletingVideos: true });
+    if (this.data.activeVideo && ids.includes(this.data.activeVideo.id)) {
       this.closePlayer();
     }
-    const cloudDeleted = await this.deleteCloudVideoFiles(video);
-    const videos = storage.removeVideo(id);
+    const cloudDeleted = await this.deleteCloudVideoFiles(videos);
+    ids.forEach((id) => storage.removeVideo(id));
     this.setData({
-      videos: this.decorateVideos(videos),
-      deletingVideoId: ""
+      managingVideos: false,
+      selectedVideoIds: [],
+      deletingVideos: false
+    }, () => {
+      this.setData({ videos: this.decorateVideos(storage.getVideos()) });
     });
     wx.showToast({
-      title: cloudDeleted ? "已删除" : "记录已删，云文件待清理",
+      title: cloudDeleted ? `已删除${videos.length}条` : "记录已删，云文件待清理",
       icon: cloudDeleted ? "success" : "none"
     });
   },

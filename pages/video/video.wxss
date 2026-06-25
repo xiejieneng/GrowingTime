@@ -1,5 +1,5 @@
 .video-page {
-  padding-bottom: 80rpx;
+  padding-bottom: 180rpx;
 }
 
 .form-panel {
@@ -54,6 +54,15 @@ input,
   font-weight: 700;
 }
 
+.record-actions {
+  display: flex;
+  align-items: center;
+}
+
+.record-actions .link + .link {
+  margin-left: 24rpx;
+}
+
 .select-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -99,12 +108,38 @@ input,
 }
 
 .task {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20rpx;
   padding: 24rpx;
   margin-bottom: 16rpx;
+}
+
+.task.selected {
+  border-color: #2f6b55;
+  background: #f7fbf8;
+}
+
+.record-check {
+  flex: 0 0 44rpx;
+  width: 44rpx;
+  height: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  background: #ffffff;
+  border: 3rpx solid #cbd6ce;
+  border-radius: 50%;
+  font-size: 26rpx;
+  font-weight: 800;
+}
+
+.record-check.checked {
+  background: #2f6b55;
+  border-color: #2f6b55;
 }
 
 .task-main {
@@ -153,25 +188,48 @@ input,
   font-size: 23rpx;
 }
 
-.task-delete {
-  width: 150rpx;
-  min-height: 58rpx;
-  height: 58rpx;
-  margin-top: 12rpx;
+.batch-bar {
+  position: fixed;
+  z-index: 20;
+  left: 24rpx;
+  right: 24rpx;
+  bottom: calc(24rpx + env(safe-area-inset-bottom));
+  height: 104rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 24rpx;
+  background: #ffffff;
+  border: 1rpx solid #e2e8e1;
+  border-radius: 12rpx;
+  box-shadow: 0 12rpx 36rpx rgba(35, 48, 41, 0.16);
+}
+
+.batch-select {
+  color: #2f6b55;
+  font-weight: 700;
+}
+
+.batch-count {
+  flex: 1;
+  margin-left: 24rpx;
+  color: #758076;
+  font-size: 24rpx;
+}
+
+.batch-delete {
+  width: 144rpx;
+  min-height: 64rpx;
+  height: 64rpx;
   padding: 0;
-  color: #b34136;
-  background: #fff5f3;
-  border: 1rpx solid #efd5d0;
-  border-radius: 8rpx;
-  font-size: 23rpx;
+  color: #ffffff;
+  background: #b34136;
+  font-size: 25rpx;
 }
 
-.task-delete[disabled] {
-  color: #b98e88;
-  background: #faf3f1;
-  border-color: #eee0dd;
+.batch-delete[disabled] {
+  color: #baaaa7;
+  background: #f0e9e7;
 }
-
 .player-mask {
   position: fixed;
   z-index: 100;
@@ -222,6 +280,31 @@ input,
   background: #111111;
   border-radius: 8rpx;
   overflow: hidden;
+}
+
+.preview-player {
+  width: 100%;
+  height: 520rpx;
+  background: #111111;
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  background: #111111;
+}
+
+.preview-badge {
+  display: inline-flex;
+  margin-top: 16rpx;
+  padding: 8rpx 14rpx;
+  color: #2f6b55;
+  background: #edf5ef;
+  border-radius: 8rpx;
+  font-size: 23rpx;
+  font-weight: 700;
 }
 
 .player-error {
