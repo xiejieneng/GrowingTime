@@ -193,7 +193,7 @@ input,
   z-index: 20;
   left: 24rpx;
   right: 24rpx;
-  bottom: calc(116rpx + env(safe-area-inset-bottom));
+  bottom: calc(92rpx + env(safe-area-inset-bottom));
   height: 104rpx;
   display: flex;
   align-items: center;
