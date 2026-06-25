@@ -38,6 +38,7 @@ Page({
         ...photo,
         selected: selected.has(photo.id),
         displayDate: formatDate(actualTakenAt) || "未知日期",
+        dateUnknown: !actualTakenAt,
         placeText: placeText(photo)
       });
       return acc;
@@ -62,6 +63,29 @@ Page({
       current,
       urls
     });
+  },
+
+  stopPropagation() {},
+
+  onPhotoDateChange(event) {
+    const id = event.currentTarget.dataset.id;
+    const date = event.detail.value;
+    if (!id || !date) {
+      return;
+    }
+    const photo = storage.updatePhoto(id, {
+      takenAt: `${date}T12:00:00`,
+      dateSource: "manual"
+    });
+    this.refreshGroups();
+
+    if (photo && auth.isLoggedIn()) {
+      cloudStore.savePhotoMeta({
+        ...photo,
+        path: "",
+        compressedPath: ""
+      }).catch((error) => console.warn("update photo date failed", error));
+    }
   },
 
   toggleManage() {

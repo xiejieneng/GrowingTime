@@ -132,6 +132,24 @@
   font-weight: 700;
 }
 
+.album-date-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8rpx;
+}
+
+.date-fix {
+  flex: none;
+  padding: 5rpx 10rpx;
+  color: #2f6b55;
+  background: #edf5ef;
+  border: 1rpx solid #cfe2d5;
+  border-radius: 6rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
 .album-place {
   margin-top: 6rpx;
   color: #758076;

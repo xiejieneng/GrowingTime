@@ -1,5 +1,5 @@
 const { readExif } = require("../../utils/exif");
-const { compressPhoto } = require("../../utils/image");
+const { compressPhotoFast } = require("../../utils/image");
 const storage = require("../../utils/storage");
 const cloudStore = require("../../utils/cloudStore");
 const auth = require("../../utils/auth");
@@ -33,6 +33,23 @@ function formatPixels(width, height) {
   return `${width}×${height}px`;
 }
 
+async function runWithConcurrency(items, concurrency, worker) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+
+  async function run() {
+    while (nextIndex < items.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      results[index] = await worker(items[index], index);
+    }
+  }
+
+  const workerCount = Math.min(concurrency, items.length);
+  await Promise.all(Array.from({ length: workerCount }, run));
+  return results;
+}
+
 Page({
   data: {
     quality: 92,
@@ -42,9 +59,8 @@ Page({
     loggedIn: false,
     storageModeText: "省钱模式：仅上传展示图和索引",
     processing: false,
-    queue: [],
-    canvasWidth: 1,
-    canvasHeight: 1
+    syncing: false,
+    queue: []
   },
 
   onShow() {
@@ -115,30 +131,37 @@ Page({
       return;
     }
 
-    this.setData({ processing: true, queue: [] });
-    const saved = [];
-
-    for (const file of files) {
+    const tasks = files.map((file) => {
       const id = createId();
-      const pending = {
+      return {
         id,
-        path: file.tempFilePath,
-        statusText: "读取拍摄信息中",
-        displayDate: "识别中",
-        placeText: "识别中",
-        sizeText: formatSize(file.size)
+        file,
+        pending: {
+          id,
+          path: file.tempFilePath,
+          statusText: "读取拍摄信息中",
+          displayDate: "识别中",
+          placeText: "识别中",
+          sizeText: formatSize(file.size)
+        }
       };
-      this.setData({ queue: this.data.queue.concat(pending) });
+    });
+    this.setData({
+      processing: true,
+      queue: tasks.map((item) => item.pending)
+    });
 
-      const meta = await readExif(file.tempFilePath);
-      this.updateQueue(id, {
-        statusText: "高清压缩中",
-        displayDate: formatDate(meta.takenAt) || "未知日期",
-        placeText: placeText(meta)
-      });
-
+    const processed = await runWithConcurrency(tasks, 3, async ({ id, file }) => {
       try {
-        const compressed = await compressPhoto(this, file.tempFilePath, {
+        const meta = await readExif(file.tempFilePath);
+        this.updateQueue(id, {
+          statusText: "快速压缩中",
+          displayDate: formatDate(meta.takenAt) || "未知日期",
+          placeText: placeText(meta),
+          dateUnknown: !meta.takenAt
+        });
+
+        const compressed = await compressPhotoFast(file.tempFilePath, {
           quality: this.data.quality,
           maxSide: this.data.maxSideOptions[this.data.maxSideIndex]
         });
@@ -162,62 +185,31 @@ Page({
           storageMode: this.data.uploadOriginal ? "backup" : "saving"
         };
 
-        const loggedIn = auth.isLoggedIn();
         this.updateQueue(id, {
-          statusText: loggedIn ? "上传云存储中" : "保存到本地",
+          ...photo,
+          statusText: "本地已整理",
+          dateUnknown: !photo.takenAt,
           sizeText: compressed.reusedOriginal
             ? `${formatPixels(photo.width, photo.height)} · 原图已是更优体积，直接保留`
-            : `${formatPixels(photo.width, photo.height)} · ${formatSize(photo.originalSize)} -> ${formatSize(photo.compressedSize)}`
+            : `${formatPixels(photo.width, photo.height)} · 质量 ${photo.quality}% · 节省 ${Math.max(compressed.ratio, 0)}%`,
+          cloudText: auth.isLoggedIn() ? "等待后台同步云端" : "游客模式：仅保存在当前设备"
         });
-
-        let cloudMeta = {};
-        let cloudText = loggedIn ? "本地已保存，云端待同步" : "游客模式：仅保存在当前设备";
-        try {
-          cloudMeta = await cloudStore.uploadPhotoAssets(photo, {
-            originalPath: file.tempFilePath,
-            displayPath: compressed.path
-          });
-          cloudText = loggedIn ? this.buildCloudText(cloudMeta) : cloudText;
-        } catch (cloudError) {
-          console.warn("cloud upload failed", cloudError);
-        }
-        const cloudPhoto = {
-          ...photo,
-          ...cloudMeta,
-          cloudSynced: Boolean(cloudMeta.displayFileId),
-          cloudText
+        return {
+          photo,
+          originalPath: file.tempFilePath,
+          displayPath: compressed.path
         };
-
-        try {
-          await cloudStore.savePhotoMeta({
-            ...cloudPhoto,
-            path: "",
-            compressedPath: ""
-          });
-        } catch (dbError) {
-          console.warn("save photo meta failed", dbError);
-        }
-
-        saved.push(cloudPhoto);
-        this.updateQueue(id, {
-          ...cloudPhoto,
-          statusText: "已整理",
-          displayDate: formatDate(cloudPhoto.takenAt),
-          placeText: placeText(cloudPhoto),
-          sizeText: compressed.reusedOriginal
-            ? `${formatPixels(cloudPhoto.width, cloudPhoto.height)} · 已保留原图，未增加体积`
-            : `${formatPixels(cloudPhoto.width, cloudPhoto.height)} · 质量 ${cloudPhoto.quality}% · 节省 ${Math.max(compressed.ratio, 0)}%`,
-          cloudText
-        });
       } catch (error) {
         console.warn("process photo failed", error);
         this.updateQueue(id, {
           statusText: "处理失败，已保留原图",
           sizeText: formatSize(file.size)
         });
+        return null;
       }
-    }
+    });
 
+    const saved = processed.filter(Boolean).map((item) => item.photo);
     if (saved.length) {
       storage.addPhotos(saved);
       wx.showToast({
@@ -227,6 +219,90 @@ Page({
     }
 
     this.setData({ processing: false });
+    const cloudTasks = processed.filter(Boolean);
+    if (auth.isLoggedIn() && cloudTasks.length) {
+      this.syncPhotos(cloudTasks).catch((error) => {
+        console.warn("background cloud sync failed", error);
+      });
+    }
+  },
+
+  async syncPhotos(tasks) {
+    this.setData({ syncing: true });
+    try {
+      await runWithConcurrency(tasks, 2, async (task) => {
+        const latest = storage.getPhotos().find((item) => item.id === task.photo.id) || task.photo;
+        this.updateQueue(latest.id, {
+          statusText: "本地已整理",
+          cloudText: "正在后台同步云端"
+        });
+
+        try {
+          const cloudMeta = await cloudStore.uploadPhotoAssets(latest, {
+            originalPath: task.originalPath,
+            displayPath: task.displayPath
+          });
+          const cloudText = this.buildCloudText(cloudMeta);
+          const cloudPhoto = {
+            ...latest,
+            ...cloudMeta,
+            cloudSynced: Boolean(cloudMeta.displayFileId),
+            cloudText
+          };
+          storage.updatePhoto(latest.id, cloudPhoto);
+          this.updateQueue(latest.id, {
+            ...cloudPhoto,
+            statusText: "已整理",
+            cloudText
+          });
+          await cloudStore.savePhotoMeta({
+            ...cloudPhoto,
+            path: "",
+            compressedPath: ""
+          });
+        } catch (error) {
+          console.warn("cloud sync failed", error);
+          storage.updatePhoto(latest.id, {
+            cloudSynced: false,
+            cloudText: "本地已保存，云端同步失败"
+          });
+          this.updateQueue(latest.id, {
+            cloudText: "本地已保存，云端同步失败"
+          });
+        }
+      });
+    } finally {
+      this.setData({ syncing: false });
+    }
+  },
+
+  onPhotoDateChange(event) {
+    const id = event.currentTarget.dataset.id;
+    const date = event.detail.value;
+    if (!id || !date) {
+      return;
+    }
+    const takenAt = `${date}T12:00:00`;
+    const patch = {
+      takenAt,
+      dateSource: "manual",
+      displayDate: date,
+      dateUnknown: false
+    };
+    storage.updatePhoto(id, {
+      takenAt,
+      dateSource: "manual"
+    });
+    this.updateQueue(id, patch);
+
+    const photo = storage.getPhotos().find((item) => item.id === id);
+    if (photo && auth.isLoggedIn()) {
+      cloudStore.savePhotoMeta({
+        ...photo,
+        path: "",
+        compressedPath: ""
+      }).catch((error) => console.warn("update photo date failed", error));
+    }
   },
 
   updateQueue(id, patch) {

@@ -8,6 +8,16 @@ function getImageInfo(src) {
   });
 }
 
+function nativeCompressImage(options) {
+  return new Promise((resolve, reject) => {
+    wx.compressImage({
+      ...options,
+      success: (res) => resolve(res.tempFilePath),
+      fail: reject
+    });
+  });
+}
+
 function canvasToTempFilePath(options, context) {
   return new Promise((resolve, reject) => {
     wx.canvasToTempFilePath({
@@ -137,8 +147,69 @@ async function compressPhoto(page, filePath, options = {}) {
   };
 }
 
+async function compressPhotoFast(filePath, options = {}) {
+  const qualityPercent = Math.min(Math.max(Number(options.quality) || 92, 70), 100);
+  const maxSide = options.maxSide || 4096;
+  const info = await getImageInfo(filePath);
+  const target = calcTargetSize(info.width, info.height, maxSide);
+  const originalInfo = await getFileInfo(filePath);
+
+  let outputPath;
+  try {
+    outputPath = await nativeCompressImage({
+      src: filePath,
+      quality: qualityPercent,
+      compressedWidth: target.width,
+      compressedHeight: target.height
+    });
+  } catch (error) {
+    const originalPath = await saveTempFile(filePath);
+    return {
+      path: originalPath,
+      width: info.width,
+      height: info.height,
+      originalSize: originalInfo.size,
+      compressedSize: originalInfo.size,
+      quality: 100,
+      ratio: 0,
+      reusedOriginal: true
+    };
+  }
+
+  const compressedInfo = await getFileInfo(outputPath);
+  const compressedIsSmaller = compressedInfo.size > 0
+    && (!originalInfo.size || compressedInfo.size < originalInfo.size);
+
+  if (!compressedIsSmaller && originalInfo.size) {
+    const originalPath = await saveTempFile(filePath);
+    return {
+      path: originalPath,
+      width: info.width,
+      height: info.height,
+      originalSize: originalInfo.size,
+      compressedSize: originalInfo.size,
+      quality: 100,
+      ratio: 0,
+      reusedOriginal: true
+    };
+  }
+
+  const savedPath = await saveTempFile(outputPath);
+  return {
+    path: savedPath,
+    width: target.width,
+    height: target.height,
+    originalSize: originalInfo.size,
+    compressedSize: compressedInfo.size,
+    quality: qualityPercent,
+    ratio: originalInfo.size ? Math.round((1 - compressedInfo.size / originalInfo.size) * 100) : 0,
+    reusedOriginal: false
+  };
+}
+
 module.exports = {
   compressPhoto,
+  compressPhotoFast,
   getFileInfo,
   saveTempFile
 };

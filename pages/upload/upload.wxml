@@ -1,6 +1,6 @@
 <view class="page upload-page">
   <view class="title">图片高清整理</view>
-  <view class="subtitle">选择宝宝照片后，会读取照片内的拍摄日期和 GPS 信息，并以高质量参数生成更适合小程序保存与分享的版本。</view>
+  <view class="subtitle">优先读取照片内的拍摄日期和 GPS；手机未提供原始信息时，可在整理结果中手动补录日期。</view>
 
   <view class="section panel control-panel">
     <view class="storage-mode">
@@ -28,7 +28,7 @@
     <view class="field-row max-row">
       <view>
         <view class="field-title">最长边限制</view>
-        <view class="field-desc">默认 4096px，兼顾清晰度与体积</view>
+        <view class="field-desc">原生快速压缩，默认 4096px 保持高清</view>
       </view>
       <picker range="{{maxSideOptions}}" value="{{maxSideIndex}}" bindchange="onMaxSideChange">
         <view class="picker-value">{{maxSideOptions[maxSideIndex]}}px</view>
@@ -38,6 +38,7 @@
     <button class="primary-btn choose-btn" hover-class="button-pressed" loading="{{processing}}" disabled="{{processing}}" bindtap="chooseImages">
       {{processing ? "处理中" : "选择照片"}}
     </button>
+    <view class="speed-note">{{syncing ? "照片已可使用，正在后台同步云端" : "最多 3 张并行处理，本地完成后立即可用"}}</view>
   </view>
 
   <view wx:if="{{queue.length}}" class="section section-head">
@@ -50,12 +51,15 @@
       <image src="{{item.compressedPath || item.path}}" mode="aspectFill" fade-in="{{false}}"></image>
       <view class="queue-body">
         <view class="queue-title">{{item.statusText}}</view>
-        <view class="queue-meta">{{item.displayDate}} · {{item.placeText}}</view>
+        <view class="queue-meta queue-date">
+          <text>{{item.displayDate}} · {{item.placeText}}</text>
+          <picker wx:if="{{item.dateUnknown}}" mode="date" data-id="{{item.id}}" bindchange="onPhotoDateChange">
+            <view class="date-fix">补录日期</view>
+          </picker>
+        </view>
         <view class="queue-meta">{{item.sizeText}}</view>
         <view wx:if="{{item.cloudText}}" class="queue-cloud">{{item.cloudText}}</view>
       </view>
     </view>
   </view>
-
-  <canvas canvas-id="compressCanvas" class="compress-canvas" style="width: {{canvasWidth}}px; height: {{canvasHeight}}px;"></canvas>
 </view>

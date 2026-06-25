@@ -72,6 +72,13 @@
   margin-top: 32rpx;
 }
 
+.speed-note {
+  margin-top: 14rpx;
+  color: #758076;
+  font-size: 23rpx;
+  text-align: center;
+}
+
 .section-head {
   display: flex;
   align-items: center;
@@ -117,15 +124,25 @@
   line-height: 1.4;
 }
 
+.queue-date {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.date-fix {
+  padding: 5rpx 12rpx;
+  color: #2f6b55;
+  background: #edf5ef;
+  border: 1rpx solid #cfe2d5;
+  border-radius: 6rpx;
+  font-weight: 700;
+}
+
 .queue-cloud {
   margin-top: 10rpx;
   color: #2f6b55;
   font-size: 24rpx;
   line-height: 1.4;
-}
-
-.compress-canvas {
-  position: fixed;
-  left: -9999px;
-  top: -9999px;
 }

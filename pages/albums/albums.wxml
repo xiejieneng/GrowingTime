@@ -19,7 +19,12 @@
           <image src="{{photo.compressedPath || photo.path}}" mode="aspectFill" fade-in="{{false}}" show-menu-by-longpress="{{true}}"></image>
           <view wx:if="{{managing}}" class="select-indicator {{photo.selected ? 'checked' : ''}}">{{photo.selected ? "✓" : ""}}</view>
           <view class="album-meta">
-            <view class="album-date">{{photo.displayDate}}</view>
+            <view class="album-date-row">
+              <view class="album-date">{{photo.displayDate}}</view>
+              <picker wx:if="{{photo.dateUnknown && !managing}}" mode="date" data-id="{{photo.id}}" catchtap="stopPropagation" bindchange="onPhotoDateChange">
+                <view class="date-fix">补录日期</view>
+              </picker>
+            </view>
             <view class="album-place">{{photo.placeText}}</view>
           </view>
         </view>

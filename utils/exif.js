@@ -138,15 +138,23 @@ function parseExif(buffer) {
 function readExif(filePath) {
   return new Promise((resolve) => {
     const fs = wx.getFileSystemManager();
-    fs.readFile({
+    wx.getFileInfo({
       filePath,
-      success: (res) => {
-        try {
-          resolve(parseExif(res.data));
-        } catch (error) {
-          console.warn("parse exif failed", error);
-          resolve({});
-        }
+      success: (file) => {
+        fs.readFile({
+          filePath,
+          position: 0,
+          length: Math.min(file.size || 1024 * 1024, 1024 * 1024),
+          success: (res) => {
+            try {
+              resolve(parseExif(res.data));
+            } catch (error) {
+              console.warn("parse exif failed", error);
+              resolve({});
+            }
+          },
+          fail: () => resolve({})
+        });
       },
       fail: () => resolve({})
     });
