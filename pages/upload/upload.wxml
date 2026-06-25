@@ -43,12 +43,16 @@
 
   <view wx:if="{{queue.length}}" class="section section-head">
     <view class="section-title">本次处理</view>
-    <view class="muted">{{queue.length}} 张</view>
+    <view class="queue-head-actions">
+      <view class="muted">{{queue.length}} 张</view>
+      <view class="manage-link" bindtap="toggleQueueManage">{{managingQueue ? "取消" : "管理"}}</view>
+    </view>
   </view>
 
   <view class="queue">
-    <view wx:for="{{queue}}" wx:key="id" class="queue-item panel">
+    <view wx:for="{{queue}}" wx:key="id" class="queue-item panel {{item.selected ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="toggleQueueSelection">
       <image src="{{item.compressedPath || item.path}}" mode="aspectFill" fade-in="{{false}}"></image>
+      <view wx:if="{{managingQueue}}" class="record-check {{item.selected ? 'checked' : ''}}">{{item.selected ? "✓" : ""}}</view>
       <view class="queue-body">
         <view class="queue-title">{{item.statusText}}</view>
         <view class="queue-meta queue-date">
@@ -61,5 +65,11 @@
         <view wx:if="{{item.cloudText}}" class="queue-cloud">{{item.cloudText}}</view>
       </view>
     </view>
+  </view>
+
+  <view wx:if="{{managingQueue}}" class="batch-bar">
+    <view class="batch-select" bindtap="selectAllQueue">{{selectedQueueIds.length === queue.length ? "取消全选" : "全选"}}</view>
+    <view class="batch-count">已选 {{selectedQueueIds.length}} 条</view>
+    <button class="batch-delete" disabled="{{!selectedQueueIds.length}}" bindtap="removeSelectedQueueRecords">移除记录</button>
   </view>
 </view>

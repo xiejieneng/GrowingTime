@@ -1,5 +1,5 @@
 .upload-page {
-  padding-bottom: 80rpx;
+  padding-bottom: 280rpx;
 }
 
 .control-panel {
@@ -90,16 +90,56 @@
   font-weight: 700;
 }
 
+.queue-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.manage-link {
+  color: #2f6b55;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
 .queue {
   margin-top: 18rpx;
 }
 
 .queue-item {
+  position: relative;
   display: grid;
   grid-template-columns: 180rpx 1fr;
   gap: 20rpx;
   overflow: hidden;
   margin-bottom: 18rpx;
+}
+
+.queue-item.selected {
+  border-color: #2f6b55;
+  background: #f7fbf8;
+}
+
+.record-check {
+  position: absolute;
+  z-index: 2;
+  top: 12rpx;
+  left: 12rpx;
+  width: 44rpx;
+  height: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  background: rgba(35, 48, 41, 0.45);
+  border: 3rpx solid #ffffff;
+  border-radius: 50%;
+  font-size: 26rpx;
+  font-weight: 800;
+}
+
+.record-check.checked {
+  background: #2f6b55;
 }
 
 .queue-item image {
@@ -145,4 +185,47 @@
   color: #2f6b55;
   font-size: 24rpx;
   line-height: 1.4;
+}
+
+.batch-bar {
+  position: fixed;
+  z-index: 20;
+  left: 24rpx;
+  right: 24rpx;
+  bottom: calc(92rpx + env(safe-area-inset-bottom));
+  height: 104rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 24rpx;
+  background: #ffffff;
+  border: 1rpx solid #e2e8e1;
+  border-radius: 12rpx;
+  box-shadow: 0 12rpx 36rpx rgba(35, 48, 41, 0.16);
+}
+
+.batch-select {
+  color: #2f6b55;
+  font-weight: 700;
+}
+
+.batch-count {
+  flex: 1;
+  margin-left: 24rpx;
+  color: #758076;
+  font-size: 24rpx;
+}
+
+.batch-delete {
+  width: 176rpx;
+  min-height: 64rpx;
+  height: 64rpx;
+  padding: 0;
+  color: #ffffff;
+  background: #b34136;
+  font-size: 24rpx;
+}
+
+.batch-delete[disabled] {
+  color: #baaaa7;
+  background: #f0e9e7;
 }

@@ -1,6 +1,6 @@
 <view class="page video-page">
   <view class="title">AI 成长短视频</view>
-  <view class="subtitle">从已整理照片中选择片段，生成满月、生日、旅行或日常主题短视频。真实生成能力通过云函数接入视频模型服务。</view>
+  <view class="subtitle">选择一张宝宝照片，由 AI 生成具有真实动作、镜头运动和环境变化的短视频，不再使用照片轮播代替成品。</view>
 
   <view class="section panel form-panel">
     <view class="field">
@@ -30,7 +30,7 @@
 
   <view class="section section-head">
     <view class="section-title">选择照片</view>
-    <view class="muted">已选 {{selectedCount}} 张</view>
+    <view class="muted">{{selectedCount ? "已选择" : "请选择 1 张"}}</view>
   </view>
 
   <view wx:if="{{photos.length}}" class="select-grid">
@@ -64,7 +64,7 @@
         </view>
         <view class="task-side">
           <view class="task-status {{item.failed ? 'failed' : ''}}">{{item.statusText}}</view>
-          <button wx:if="{{item.playable && !managingVideos}}" class="task-play" hover-class="button-pressed" data-id="{{item.id}}" catchtap="playVideo">{{item.previewOnly ? "播放预览" : "在线播放"}}</button>
+          <button wx:if="{{item.playable && !managingVideos}}" class="task-play" hover-class="button-pressed" data-id="{{item.id}}" catchtap="playVideo">在线播放</button>
         </view>
       </view>
     </view>

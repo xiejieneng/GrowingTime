@@ -10,7 +10,7 @@ Page({
     theme: "宝宝成长回忆",
     styles: ["温暖纪实", "童话绘本", "清新胶片", "生日派对"],
     styleIndex: 0,
-    durations: [10, 15, 30],
+    durations: [5, 10],
     durationIndex: 1,
     photos: [],
     selectedCount: 0,
@@ -26,51 +26,43 @@ Page({
 
   onHide() {
     this.stopPreviewTimer();
+    this.stopTaskPolling();
   },
 
   onUnload() {
     this.stopPreviewTimer();
+    this.stopTaskPolling();
   },
 
   onShow() {
     const storedPhotos = storage.getPhotos();
     const photos = storedPhotos.map((item, index) => ({
       ...item,
-      selected: index < 6
+      selected: index === 0
     }));
-    const migratedVideos = this.migratePreviewRecords(storage.getVideos(), storedPhotos);
+    const migratedVideos = this.migratePreviewRecords(storage.getVideos());
     const videos = this.decorateVideos(migratedVideos);
     this.setData({
       photos,
       videos,
       selectedCount: photos.filter((item) => item.selected).length
     }, () => {
-      if (this.data.activeVideo && this.data.activeVideo.previewOnly) {
-        this.startPreviewTimer();
-      }
+      this.scheduleTaskRefresh();
     });
   },
 
-  migratePreviewRecords(videos, photos) {
+  migratePreviewRecords(videos) {
     let changed = false;
     const next = videos.map((video) => {
       const isMockTask = /^(mock|local)_/.test(video.taskId || "");
-      if (!isMockTask || video.videoFileId || video.videoUrl || (video.previewPhotos && video.previewPhotos.length)) {
-        return video;
-      }
-      const previewPhotos = photos
-        .slice(0, video.photoCount || 6)
-        .map((photo) => photo.compressedPath || photo.path)
-        .filter(Boolean);
-      if (!previewPhotos.length) {
+      if (!isMockTask || video.videoFileId || video.videoUrl || video.status === "legacy") {
         return video;
       }
       changed = true;
       return {
         ...video,
-        status: "completed",
-        statusText: "预览可播放",
-        previewPhotos
+        status: "legacy",
+        statusText: "旧版幻灯片，非 AI 视频"
       };
     });
     if (changed) {
@@ -84,10 +76,10 @@ Page({
     return videos.map((video) => ({
       ...video,
       selected: selected.has(video.id),
-      playable: Boolean(video.videoFileId || video.videoUrl || (video.previewPhotos && video.previewPhotos.length)),
-      previewOnly: !video.videoFileId && !video.videoUrl && Boolean(video.previewPhotos && video.previewPhotos.length),
+      playable: Boolean(video.videoFileId || video.videoUrl),
+      previewOnly: false,
       completed: video.status === "completed" || video.status === "success",
-      failed: video.status === "failed"
+      failed: video.status === "failed" || video.status === "legacy"
     }));
   },
 
@@ -141,7 +133,10 @@ Page({
 
   togglePhoto(event) {
     const id = event.currentTarget.dataset.id;
-    const photos = this.data.photos.map((item) => item.id === id ? { ...item, selected: !item.selected } : item);
+    const photos = this.data.photos.map((item) => ({
+      ...item,
+      selected: item.id === id ? !item.selected : false
+    }));
     this.setData({
       photos,
       selectedCount: photos.filter((item) => item.selected).length
@@ -152,6 +147,19 @@ Page({
     const selected = this.data.photos.filter((item) => item.selected);
     if (!selected.length) {
       wx.showToast({ title: "请选择照片", icon: "none" });
+      return;
+    }
+    if (!auth.canUseCloud() || !auth.isLoggedIn()) {
+      wx.showModal({
+        title: "登录后生成 AI 视频",
+        content: "AI 视频需要把照片安全提交到云函数，并由云端调用视频生成服务。",
+        confirmText: "去登录",
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({ url: "/pages/account/account" });
+          }
+        }
+      });
       return;
     }
 
@@ -173,18 +181,19 @@ Page({
         }))
       };
       const result = await this.callCreateVideo(payload);
-      const hasVideoSource = Boolean(result.videoFileId || result.fileID || result.videoUrl);
-      const isMockTask = !hasVideoSource && /^(mock|local)_/.test(result.taskId || "");
+      if (result.error) {
+        throw new Error(result.message || result.error);
+      }
       const video = {
         id: createId(),
         taskId: result.taskId,
-        status: isMockTask ? "completed" : (result.status || "queued"),
-        statusText: isMockTask ? "预览可播放" : (result.statusText || "排队中"),
+        status: result.status || "queued",
+        statusText: result.statusText || "AI 生成排队中",
         theme: payload.theme,
         style: payload.style,
         duration: payload.duration,
         photoCount: selected.length,
-        previewPhotos: selected.map((item) => item.compressedPath || item.path).filter(Boolean),
+        previewPhotos: [],
         videoFileId: result.videoFileId || result.fileID || "",
         videoUrl: result.videoUrl || "",
         coverFileId: result.coverFileId || "",
@@ -197,10 +206,14 @@ Page({
         creating: false
       });
       wx.showToast({ title: "已提交", icon: "success" });
+      this.scheduleTaskRefresh();
     } catch (error) {
       console.warn("create video failed", error);
       this.setData({ creating: false });
-      wx.showToast({ title: "提交失败", icon: "none" });
+      const message = /CONFIG_REQUIRED/.test(error.message)
+        ? "AI 服务尚未配置"
+        : "AI 视频提交失败";
+      wx.showToast({ title: message, icon: "none" });
     }
   },
 
@@ -241,14 +254,6 @@ Page({
   },
 
   callCreateVideo(payload) {
-    if (!auth.canUseCloud() || !auth.isLoggedIn()) {
-      return Promise.resolve({
-        taskId: `local_${Date.now()}`,
-        status: "queued",
-        statusText: "本地模拟"
-      });
-    }
-
     return wx.cloud.callFunction({
       name: "createVideo",
       data: {
@@ -384,20 +389,30 @@ Page({
     });
   },
 
-  async refreshTasks() {
+  async refreshTasks(options = {}) {
+    const silent = Boolean(options && options.silent);
     if (this.data.refreshing) {
       return;
     }
     if (!auth.canUseCloud() || !auth.isLoggedIn()) {
-      wx.showToast({ title: "请登录后刷新云端任务", icon: "none" });
+      if (!silent) {
+        wx.showToast({ title: "请登录后刷新云端任务", icon: "none" });
+      }
       return;
     }
 
     const pending = storage.getVideos().filter((video) => {
-      return video.taskId && !video.videoFileId && !video.videoUrl && video.status !== "failed";
+      return video.taskId
+        && !/^(mock|local)_/.test(video.taskId)
+        && !video.videoFileId
+        && !video.videoUrl
+        && video.status !== "failed"
+        && video.status !== "legacy";
     });
     if (!pending.length) {
-      wx.showToast({ title: "没有待刷新的任务", icon: "none" });
+      if (!silent) {
+        wx.showToast({ title: "没有待刷新的任务", icon: "none" });
+      }
       return;
     }
 
@@ -413,6 +428,9 @@ Page({
           }
         });
         const result = res.result || {};
+        if (result.error) {
+          throw new Error(result.message || result.error);
+        }
         const patch = {
           status: result.status || video.status,
           statusText: result.statusText || video.statusText,
@@ -433,10 +451,37 @@ Page({
       videos: this.decorateVideos(storage.getVideos()),
       refreshing: false
     });
-    wx.showToast({
-      title: completedCount ? `${completedCount}个视频已完成` : "任务状态已刷新",
-      icon: completedCount ? "success" : "none"
+    if (!silent || completedCount) {
+      wx.showToast({
+        title: completedCount ? `${completedCount}个视频已完成` : "任务状态已刷新",
+        icon: completedCount ? "success" : "none"
+      });
+    }
+    this.scheduleTaskRefresh();
+  },
+
+  scheduleTaskRefresh() {
+    this.stopTaskPolling();
+    const hasPending = storage.getVideos().some((video) => {
+      return video.taskId
+        && !/^(mock|local)_/.test(video.taskId)
+        && !video.videoFileId
+        && !video.videoUrl
+        && video.status !== "failed";
     });
+    if (!hasPending || !auth.isLoggedIn()) {
+      return;
+    }
+    this.taskPollTimer = setTimeout(() => {
+      this.refreshTasks({ silent: true });
+    }, 15000);
+  },
+
+  stopTaskPolling() {
+    if (this.taskPollTimer) {
+      clearTimeout(this.taskPollTimer);
+      this.taskPollTimer = null;
+    }
   },
 
   confirmDelete(content) {

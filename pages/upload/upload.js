@@ -60,7 +60,9 @@ Page({
     storageModeText: "省钱模式：仅上传展示图和索引",
     processing: false,
     syncing: false,
-    queue: []
+    queue: [],
+    managingQueue: false,
+    selectedQueueIds: []
   },
 
   onShow() {
@@ -81,6 +83,61 @@ Page({
 
   onMaxSideChange(event) {
     this.setData({ maxSideIndex: Number(event.detail.value) });
+  },
+
+  toggleQueueManage() {
+    this.setData({
+      managingQueue: !this.data.managingQueue,
+      selectedQueueIds: []
+    });
+  },
+
+  toggleQueueSelection(event) {
+    if (!this.data.managingQueue) {
+      return;
+    }
+    const id = event.currentTarget.dataset.id;
+    const selected = new Set(this.data.selectedQueueIds);
+    if (selected.has(id)) {
+      selected.delete(id);
+    } else {
+      selected.add(id);
+    }
+    const selectedQueueIds = Array.from(selected);
+    this.setData({
+      selectedQueueIds,
+      queue: this.data.queue.map((item) => ({
+        ...item,
+        selected: selected.has(item.id)
+      }))
+    });
+  },
+
+  selectAllQueue() {
+    const selectedQueueIds = this.data.selectedQueueIds.length === this.data.queue.length
+      ? []
+      : this.data.queue.map((item) => item.id);
+    const selected = new Set(selectedQueueIds);
+    this.setData({
+      selectedQueueIds,
+      queue: this.data.queue.map((item) => ({
+        ...item,
+        selected: selected.has(item.id)
+      }))
+    });
+  },
+
+  removeSelectedQueueRecords() {
+    const selected = new Set(this.data.selectedQueueIds);
+    if (!selected.size) {
+      return;
+    }
+    this.setData({
+      queue: this.data.queue.filter((item) => !selected.has(item.id)),
+      selectedQueueIds: [],
+      managingQueue: false
+    });
+    wx.showToast({ title: `已移除${selected.size}条记录`, icon: "success" });
   },
 
   onOriginalSwitch(event) {
@@ -148,6 +205,8 @@ Page({
     });
     this.setData({
       processing: true,
+      managingQueue: false,
+      selectedQueueIds: [],
       queue: tasks.map((item) => item.pending)
     });
 
